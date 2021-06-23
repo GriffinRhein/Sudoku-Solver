@@ -1,77 +1,6 @@
 public class FishTwoThreeFour
 {
-	// Functions called by SudokuSolve. Gives the appropriate parameters to the big procedure,
-	// and calls it for every combination of rows and combination of columns, for every number.
-
-	public void TwoFish_XWing(FullSudoku mySudoku)
-	{
-		Square[] dudRCB = new Square[9];
-
-		for(int a=0;a<9;a++)
-		{
-			for(int b=0;b<9;b++)
-			{
-				if(a < b)
-				{
-					for(Integer e=1;e<10;e++)
-					{
-						singleSimpleFish(mySudoku,mySudoku.provideRow(a),mySudoku.provideRow(b),dudRCB,dudRCB,2,true,e);
-						singleSimpleFish(mySudoku,mySudoku.provideCol(a),mySudoku.provideCol(b),dudRCB,dudRCB,2,false,e);
-					}
-				}
-			}
-		}
-	}
-
-	public void ThreeFish_Swordfish(FullSudoku mySudoku)
-	{
-		Square[] dudRCB = new Square[9];
-
-		for(int a=0;a<9;a++)
-		{
-			for(int b=0;b<9;b++)
-			{
-				for(int c=0;c<9;c++)
-				{
-					if(a < b && b < c)
-					{
-						for(Integer e=1;e<10;e++)
-						{
-							singleSimpleFish(mySudoku,mySudoku.provideRow(a),mySudoku.provideRow(b),mySudoku.provideRow(c),dudRCB,3,true,e);
-							singleSimpleFish(mySudoku,mySudoku.provideCol(a),mySudoku.provideCol(b),mySudoku.provideCol(c),dudRCB,3,false,e);
-						}
-					}
-				}
-			}
-		}
-	}
-
-	public void FourFish_Jellyfish(FullSudoku mySudoku)
-	{
-		for(int a=0;a<9;a++)
-		{
-			for(int b=0;b<9;b++)
-			{
-				for(int c=0;c<9;c++)
-				{
-					for(int d=0;d<9;d++)
-					{
-						if(a < b && b < c && c < d)
-						{
-							for(Integer e=1;e<10;e++)
-							{
-								singleSimpleFish(mySudoku,mySudoku.provideRow(a),mySudoku.provideRow(b),mySudoku.provideRow(c),mySudoku.provideRow(d),4,true,e);
-								singleSimpleFish(mySudoku,mySudoku.provideCol(a),mySudoku.provideCol(b),mySudoku.provideCol(c),mySudoku.provideCol(d),4,false,e);
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-
-	// The specific base sets we work with
+	// Specific base sets we work with
 
 	private Square[] firstBaseSet;
 	private Square[] secondBaseSet;
@@ -79,93 +8,40 @@ public class FishTwoThreeFour
 	private Square[] fourthBaseSet;
 
 
-	// Quick function just to see whether a number falls within
-	// a range given by two others. Allows for shorthand later.
+	// The following function is used for X-Wing, Swordfish, and Jellyfish
+	// (Functions which call this one are at the bottom of this document)
 
-	private Boolean inBetween(int testing,int a,int b)
-	{
-		if(testing >= a && testing <= b)
-			return true;
+	// Inputs are:
 
-		return false;
-	}
+	// the Sudoku
+	// int from 0 to 8 indicating the 1st row/column being looked at
+	// int from 0 to 8 indicating the 2nd row/column being looked at
+	// int from 0 to 8 indicating the 3rd row/column being looked at
+	// int from 0 to 8 indicating the 4th row/column being looked at
+	// int from 2 to 4 which represents the fish type
+	// boolean which must be input as True if the sets input are rows and False if the sets input are columns
+	// Integer for the actual number being tested
 
+	// Worth nothing that for X-Wing, RC3 and RC4 are never looked at, and for Swordfish, RC4 is never looked at.
 
-	// Used to record the specific squares across all base sets
-	// which can still contain the number.
-
-	// We start with fullArray representing nine squares, and
-	// knock off squares as we see that the number is still in
-	// the possArray for that square in ANY of the 2-4 base sets,
-	// incrementing fullCounter each time a square is axed.
-
-	// When we're done checking all base sets, fullCounter will
-	// be the total amount of cover sets needed to cover every
-	// square in the base sets with the number in a possArray.
-
-	private int[] fullArray = new int[]{0,1,2,3,4,5,6,7,8};
-	private int fullCounter = 0;
-
-	private void goodCoverSets(int theFishType, int checkedNum)
-	{
-		// Reset fullArray
-
-		for(int i=0;i<9;i++)
-			fullArray[i] = i;
-
-		fullCounter = 0;
-
-
-		// Handy array to hold base sets
-
-		Square[][] theBaseSets = new Square[][]{firstBaseSet,secondBaseSet,thirdBaseSet,fourthBaseSet};
-
-
-		// Get to work. Every square from 0-8 which can hold the number
-		// will be marked on fullArray, with fullCounter incremented
-
-		Boolean canThisWork = false;
-
-		for(int a=0;a<9;a++)
-		{
-			for(int b=0;b<4;b++)
-			{
-				canThisWork = false;
-
-				switch(theFishType)
-				{
-					case 2: if(b < 2) canThisWork = true; break;
-					case 3: if(b < 3) canThisWork = true; break;
-					case 4: if(b < 4) canThisWork = true; break;
-				}
-
-				if(canThisWork)
-				{
-					if(theBaseSets[b][a].result == null)
-					{
-						if(theBaseSets[b][a].possArray[checkedNum-1] != null)
-						{
-							if(fullArray[a] != -20)
-							{
-								fullArray[a] = -20;
-								fullCounter++;
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-
-	private void singleSimpleFish(FullSudoku mySudoku, Square[] RC1, Square[] RC2, Square[] RC3, Square[] RC4, int fishType, Boolean inputRows, Integer numToCheck)
+	private void singleSimpleFish(FullSudoku mySudoku, int RC1, int RC2, int RC3, int RC4, int fishType, Boolean inputRows, Integer numToCheck)
 	{
 		// Set base sets
 
-		firstBaseSet = RC1;
-		secondBaseSet = RC2;
-		if(fishType >= 3) thirdBaseSet = RC3;
-		if(fishType >= 4) fourthBaseSet = RC4;
+		if(inputRows)
+		{
+			firstBaseSet = mySudoku.provideRow(RC1);
+			secondBaseSet = mySudoku.provideRow(RC2);
+			if(fishType >= 3) thirdBaseSet = mySudoku.provideRow(RC3);
+			if(fishType >= 4) fourthBaseSet = mySudoku.provideRow(RC4);
+		}
+		else
+		{
+			firstBaseSet = mySudoku.provideCol(RC1);
+			secondBaseSet = mySudoku.provideCol(RC2);
+			if(fishType >= 3) thirdBaseSet = mySudoku.provideCol(RC3);
+			if(fishType >= 4) fourthBaseSet = mySudoku.provideCol(RC4);
+		}
 
 
 		// Retrieve the appropriate PossPrevalence
@@ -182,62 +58,39 @@ public class FishTwoThreeFour
 		}
 
 
-		// Make note of which rows/columns we have.
-		// 21 is just junk for initialization.
+		// Take the prevalence of the possibility in the input rows/columns.
 
-		int firstRC = 21;
-		int secondRC = 21;
-		int thirdRC = 21;
-		int fourthRC = 21;
+		// X-Wing requires exactly 2 squares in each of the two base sets to
+		// have the Poss available, Swordfish requires 2-3 squares in each of
+		// the three base sets to have it, and Jellyfish requires 2-4 squares
+		// in each of the four base sets.
 
-		if(inputRows)
-		{
-			firstRC = firstBaseSet[0].ownRow;
-			secondRC = secondBaseSet[0].ownRow;
-			if(fishType >= 3) thirdRC = thirdBaseSet[0].ownRow;
-			if(fishType >= 4) fourthRC = fourthBaseSet[0].ownRow;
-		}
-		else
-		{
-			firstRC = firstBaseSet[0].ownCol;
-			secondRC = secondBaseSet[0].ownCol;
-			if(fishType >= 3) thirdRC = thirdBaseSet[0].ownCol;
-			if(fishType >= 4) fourthRC = fourthBaseSet[0].ownCol;
-		}
+		// Function called inRange() checks if a number is in a range
 
+		int prevRC1 = -33; int prevRC2 = -33; int prevRC3 = -33; int prevRC4 = -33;
 
-		// Take the prevalence of the possibility in the 2-4 rows/columns.
-		// 22 is just junk for initialization.
-
-		int firstPrev = 22;
-		int secondPrev = 22;
-		int thirdPrev = 22;
-		int fourthPrev = 22;
-
-		firstPrev = ourPrev[firstRC][numToCheck-1];
-		secondPrev = ourPrev[secondRC][numToCheck-1];
-		if(fishType >= 3) thirdPrev = ourPrev[thirdRC][numToCheck-1];
-		if(fishType >= 4) fourthPrev = ourPrev[fourthRC][numToCheck-1];
-
-
-		// Make sure that each base set contains the number in an
-		// appropriate number of squares' possArrays.
-
-		// PossPrevalence arrays are very convenient.
+		prevRC1 = ourPrev[RC1][numToCheck-1];
+		prevRC2 = ourPrev[RC2][numToCheck-1];
+		if(fishType >= 3) prevRC3 = ourPrev[RC3][numToCheck-1];
+		if(fishType >= 4) prevRC4 = ourPrev[RC4][numToCheck-1];
 
 		Boolean canWePass = false;
 
 		switch(fishType)
 		{
-			case 2: if(inBetween(firstPrev,2,2) && inBetween(secondPrev,2,2)) canWePass = true; break;
-			case 3: if(inBetween(firstPrev,2,3) && inBetween(secondPrev,2,3) && inBetween(thirdPrev,2,3)) canWePass = true; break;
-			case 4: if(inBetween(firstPrev,2,4) && inBetween(secondPrev,2,4) && inBetween(thirdPrev,2,4) && inBetween(fourthPrev,2,4)) canWePass = true; break;
+			case 2: if(inRange(prevRC1,2,2) && inRange(prevRC2,2,2)) canWePass = true; break;
+			case 3: if(inRange(prevRC1,2,3) && inRange(prevRC2,2,3) && inRange(prevRC3,2,3)) canWePass = true; break;
+			case 4: if(inRange(prevRC1,2,4) && inRange(prevRC2,2,4) && inRange(prevRC3,2,4) && inRange(prevRC4,2,4)) canWePass = true; break;
 		}
+
+
+		// ~~~ If no square possesses a possPrevalence which makes the sought-after fish impossible, then on to the next step ~~~
+
 
 		if(canWePass)
 		{
-			// Make sure that all squares which can contain our number
-			// fall within the appropriate number of cover sets
+			// Function goodCoverSets(), further down, looks through the base
+			// sets and determines whether the sought-after fish exists
 
 			goodCoverSets(fishType,numToCheck);
 
@@ -250,10 +103,14 @@ public class FishTwoThreeFour
 				case 4: if(fullCounter <= 4) canWePass = true; break;
 			}
 
+
+			// ~~~ If the fish exists, then on to the elimination step ~~~
+
+
 			if(canWePass)
 			{
-				// Now, erase the number from all squares
-				// in cover sets but not base sets
+				// To erase the number from all squares in cover sets
+				// but not base sets, we will need the cover sets
 
 				Square[][] theCoverSets = new Square[fishType][9];
 
@@ -261,7 +118,10 @@ public class FishTwoThreeFour
 
 				for(int z=0;z<9;z++)
 				{
-					if(fullArray[z] == -20)
+					// Thanks to goodCoverSets(), the cover sets are those
+					// whose associated spot in fullArray is marked true.  
+
+					if(fullArray[z] == true)
 					{
 						if(inputRows)
 						{
@@ -277,19 +137,18 @@ public class FishTwoThreeFour
 				}
 
 
-				// Elimination time. Go through each square of the cover sets
+				// Elimination time. Go through each square of the cover sets, and
+				// knock off the possibility from all squares not in the base sets
 
 				for(int r=0;r<9;r++)
 				{
-					// Make sure we are not in one of the 2-4 base sets
-
 					canWePass = false;
 
 					switch(fishType)
 					{
-						case 2: if(r != firstRC && r != secondRC) canWePass = true; break;
-						case 3: if(r != firstRC && r != secondRC && r != thirdRC) canWePass = true; break;
-						case 4: if(r != firstRC && r != secondRC && r != thirdRC && r != fourthRC) canWePass = true; break;
+						case 2: if(r != RC1 && r != RC2) canWePass = true; break;
+						case 3: if(r != RC1 && r != RC2 && r != RC3) canWePass = true; break;
+						case 4: if(r != RC1 && r != RC2 && r != RC3 && r != RC4) canWePass = true; break;
 					}
 
 					if(canWePass)
@@ -308,5 +167,193 @@ public class FishTwoThreeFour
 		}
 
 	} // singleSimpleFish()
+
+
+	// Quick function just to see whether a number falls within
+	// a range given by two others. Allows for shorthand.
+
+	private Boolean inRange(int testing,int a,int b)
+	{
+		if(testing >= a && testing <= b)
+			return true;
+
+		return false;
+
+	} // inRange()
+
+
+	// goodCoverSets() is used to record the specific squares
+	// across all base sets which can still contain the number.
+
+	// We start with fullArray representing nine squares, and
+	// knock off squares as we see that the number is still in
+	// the possArray for that square in ANY of the 2-4 base sets,
+	// incrementing fullCounter each time a square is axed.
+
+	// When we're done checking all base sets, fullCounter will
+	// be the total amount of cover sets needed to cover every
+	// square in base sets which has the number in a possArray.
+
+	private boolean[] fullArray = new boolean[9];
+	private int fullCounter = 0;
+
+	private void goodCoverSets(int theFishType, int checkedNum)
+	{
+		// Reset fullArray
+
+		for(int i=0;i<9;i++)
+			fullArray[i] = false;
+
+		fullCounter = 0;
+
+
+		// Handy array to hold base sets
+
+		Square[][] theBaseSets = new Square[][]{firstBaseSet,secondBaseSet,thirdBaseSet,fourthBaseSet};
+
+		// Handy boolean
+
+		boolean isThisRelevant;
+
+
+		// Get to work. Every square from 0-8 which can hold the number within any of
+		// the base sets will be marked on fullArray, with fullCounter incremented
+
+		// Nine squares within a base set
+
+		for(int a=0;a<9;a++)
+		{
+			// Maximum of four base sets
+
+			for(int b=0;b<4;b++)
+			{
+				isThisRelevant = false;
+
+				switch(theFishType)
+				{
+					case 2: if(b < 2) isThisRelevant = true; break;
+					case 3: if(b < 3) isThisRelevant = true; break;
+					case 4: if(b < 4) isThisRelevant = true; break;
+				}
+
+				if(isThisRelevant)
+				{
+					// Make sure the square is not solved
+
+					if(theBaseSets[b][a].result == null)
+					{
+						// Make sure the square can still contain the number
+
+						if(theBaseSets[b][a].possArray[checkedNum-1] != null)
+						{
+							// Make sure that spot hasn't already been marked off here
+
+							if(fullArray[a] == false)
+							{
+								fullArray[a] = true;
+								fullCounter++;
+							}
+						}
+					}
+				}
+			}
+		}
+
+	} // goodCoverSets()
+
+
+	// ~~~ Public functions putting the ones above to use. ~~~
+
+
+	public void TwoFish_XWing(FullSudoku mySudoku)
+	{
+		int zilch = -33;
+
+		// Operation occurs for every possible
+		// combination of 2 rows or 2 columns
+
+		for(int a=0;a<9;a++)
+		{
+			for(int b=0;b<9;b++)
+			{
+				// Ensures that the operation occurs only
+				// once per combination of rows or columns
+
+				if(a < b)
+				{
+					// Every number is tested
+
+					for(Integer e=1;e<10;e++)
+					{
+						singleSimpleFish(mySudoku,a,b,zilch,zilch,2,true,e);
+						singleSimpleFish(mySudoku,a,b,zilch,zilch,2,false,e);
+					}
+				}
+			}
+		}
+	}
+
+	public void ThreeFish_Swordfish(FullSudoku mySudoku)
+	{
+		int zilch = -33;
+
+		// Operation occurs for every possible
+		// combination of 3 rows or 3 columns
+
+		for(int a=0;a<9;a++)
+		{
+			for(int b=0;b<9;b++)
+			{
+				for(int c=0;c<9;c++)
+				{
+					// Ensures that the operation occurs only
+					// once per combination of rows or columns
+
+					if(a < b && b < c)
+					{
+						// Every number is tested
+
+						for(Integer e=1;e<10;e++)
+						{
+							singleSimpleFish(mySudoku,a,b,c,zilch,3,true,e);
+							singleSimpleFish(mySudoku,a,b,c,zilch,3,false,e);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	public void FourFish_Jellyfish(FullSudoku mySudoku)
+	{
+		// Operation occurs for every possible
+		// combination of 4 rows or 4 columns
+
+		for(int a=0;a<9;a++)
+		{
+			for(int b=0;b<9;b++)
+			{
+				for(int c=0;c<9;c++)
+				{
+					for(int d=0;d<9;d++)
+					{
+						// Ensures that the operation occurs only
+						// once per combination of rows or columns
+
+						if(a < b && b < c && c < d)
+						{
+							// Every number is tested
+
+							for(Integer e=1;e<10;e++)
+							{
+								singleSimpleFish(mySudoku,a,b,c,d,4,true,e);
+								singleSimpleFish(mySudoku,a,b,c,d,4,false,e);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 
 } // FishTwoThreeFour

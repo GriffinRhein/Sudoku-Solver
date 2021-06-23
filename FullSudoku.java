@@ -76,7 +76,6 @@ public class FullSudoku
 
 	public Square[] provideBox(int boxNum)
 	{
-
 		Square[] boxProvided = new Square[9];
 
 		for(int i=0;i<9;i++)
@@ -86,6 +85,62 @@ public class FullSudoku
 
 		return boxProvided;
 
+	}
+
+	// Provide every square sharing a row, column, or box with one particular square
+	// There are exactly 20 such squares, every time
+
+	public Square[] provideAllSharingRCB(Square rootSquare)
+	{
+		Square[] finalList = new Square[20];
+		int listTraverse = 0;
+
+		int boxIn;
+		Square squareToAdd;
+
+		// Insert squares from row
+
+		for(int a=0;a<9;a++)
+		{
+			if(a != rootSquare.ownCol)
+			{
+				finalList[listTraverse] = SudokuMap[rootSquare.ownRow][a];
+				listTraverse++;
+			}
+		}
+
+		// Insert squares from column
+
+		for(int a=0;a<9;a++)
+		{
+			if(a != rootSquare.ownRow)
+			{
+				finalList[listTraverse] = SudokuMap[a][rootSquare.ownCol];
+				listTraverse++;
+			}
+		}
+
+		// Insert squares from box
+
+		for(int a=0;a<=2;a++)
+		{
+			for(int b=3;b<=5;b++)
+			{
+				boxIn = rootSquare.ownBox;
+				squareToAdd = SudokuMap[boxesToCheck[boxIn][a]][boxesToCheck[boxIn][b]];
+
+				// The only squares you still need from the box are the ones
+				// which share neither a row nor a column with rootSquare
+
+				if(squareToAdd.ownRow != rootSquare.ownRow && squareToAdd.ownCol != rootSquare.ownCol)
+				{
+					finalList[listTraverse] = squareToAdd;
+					listTraverse++;
+				}
+			}
+		}
+
+		return finalList;
 	}
 
 

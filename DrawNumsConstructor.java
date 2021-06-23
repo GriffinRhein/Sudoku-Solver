@@ -49,12 +49,33 @@ public class DrawNumsConstructor extends PaintedObjects
 	KeyStroke pressDelete = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE,0);
 	KeyStroke pressEnter = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,0);
 
-	KeyStroke variableTest1 = KeyStroke.getKeyStroke(KeyEvent.VK_U, InputEvent.SHIFT_DOWN_MASK);
-	KeyStroke variableTest2 = KeyStroke.getKeyStroke(KeyEvent.VK_J, InputEvent.SHIFT_DOWN_MASK);
-	KeyStroke variableTest3 = KeyStroke.getKeyStroke(KeyEvent.VK_I, InputEvent.SHIFT_DOWN_MASK);
-	KeyStroke variableTest4 = KeyStroke.getKeyStroke(KeyEvent.VK_K, InputEvent.SHIFT_DOWN_MASK);
-	KeyStroke variableTest5 = KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.SHIFT_DOWN_MASK);
-	KeyStroke variableTest6 = KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.SHIFT_DOWN_MASK);
+	KeyStroke NakedSingleKey = KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.SHIFT_DOWN_MASK);
+	KeyStroke HiddenSingleKey = KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.SHIFT_DOWN_MASK);
+	KeyStroke PointingPairKey1 = KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.SHIFT_DOWN_MASK);
+	KeyStroke PointingPairKey2 = KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.SHIFT_DOWN_MASK);
+	KeyStroke ClaimingPairKey1 = KeyStroke.getKeyStroke(KeyEvent.VK_T, InputEvent.SHIFT_DOWN_MASK);
+	KeyStroke ClaimingPairKey2 = KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.SHIFT_DOWN_MASK);
+	KeyStroke NakedPairKey1 = KeyStroke.getKeyStroke(KeyEvent.VK_U, InputEvent.SHIFT_DOWN_MASK);
+	KeyStroke NakedPairKey2 = KeyStroke.getKeyStroke(KeyEvent.VK_I, InputEvent.SHIFT_DOWN_MASK);
+	KeyStroke HiddenPairKey1 = KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.SHIFT_DOWN_MASK);
+	KeyStroke HiddenPairKey2 = KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.SHIFT_DOWN_MASK);
+	KeyStroke NakedTripleKey1 = KeyStroke.getKeyStroke(KeyEvent.VK_A, InputEvent.SHIFT_DOWN_MASK);
+	KeyStroke NakedTripleKey2 = KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.SHIFT_DOWN_MASK);
+	KeyStroke HiddenTripleKey1 = KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.SHIFT_DOWN_MASK);
+	KeyStroke HiddenTripleKey2 = KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.SHIFT_DOWN_MASK);
+	KeyStroke NakedQuadKey1 = KeyStroke.getKeyStroke(KeyEvent.VK_G, InputEvent.SHIFT_DOWN_MASK);
+	KeyStroke NakedQuadKey2 = KeyStroke.getKeyStroke(KeyEvent.VK_H, InputEvent.SHIFT_DOWN_MASK);
+	KeyStroke HiddenQuadKey1 = KeyStroke.getKeyStroke(KeyEvent.VK_J, InputEvent.SHIFT_DOWN_MASK);
+	KeyStroke HiddenQuadKey2 = KeyStroke.getKeyStroke(KeyEvent.VK_K, InputEvent.SHIFT_DOWN_MASK);
+	KeyStroke XWingKey1 = KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.SHIFT_DOWN_MASK);
+	KeyStroke XWingKey2 = KeyStroke.getKeyStroke(KeyEvent.VK_SEMICOLON, InputEvent.SHIFT_DOWN_MASK);
+	KeyStroke SwordfishKey1 = KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.SHIFT_DOWN_MASK);
+	KeyStroke SwordfishKey2 = KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.SHIFT_DOWN_MASK);
+	KeyStroke JellyfishKey1 = KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.SHIFT_DOWN_MASK);
+	KeyStroke JellyfishKey2 = KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.SHIFT_DOWN_MASK);
+	KeyStroke XYWingKey1 = KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.SHIFT_DOWN_MASK);
+	KeyStroke XYWingKey2 = KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.SHIFT_DOWN_MASK);
+
 
 	OurRectangle recToWorkWith = new OurRectangle();
 	OurCoreGrid gridToWorkWith = new OurCoreGrid();
@@ -67,7 +88,7 @@ public class DrawNumsConstructor extends PaintedObjects
 
 	String[][] stringCompForFinal = new String[9][9];
 
-	SudokuSolve theSudokuWeSendTo;
+	SudokuSolveHumanMethods theSudokuWeSendTo;
 
 
 	// Create InputMap and ActionMap
@@ -221,185 +242,700 @@ public class DrawNumsConstructor extends PaintedObjects
 	};
 
 
-	// Test Sudoku #1
+	// Test Sudoku
 
-	Action firstTestCase = new AbstractAction()
+	Action NakedSingleAction = new AbstractAction()
 	{
-			public void actionPerformed(ActionEvent e)
+		public void actionPerformed(ActionEvent e)
+		{
+			Integer[][] testingTheYes = { {4,null,2,7,null,6,null,8,9},
+										 {null,null,null,null,null,null,null,null,6},
+										 {5,6,null,null,1,null,null,7,null},
+										 {6,9,null,null,5,null,2,1,null},
+										 {1,null,null,null,4,3,null,null,8},
+										 {null,8,7,null,9,null,null,null,null},
+										 {null,3,null,null,7,4,null,6,5},
+										 {8,null,null,null,null,5,null,null,null},
+										 {null,null,null,9,null,8,4,null,1} };
+
+			for(int i=0;i<ROWS;i++)
 			{
-				Integer[][] testingTheYes = { {null,null,null,null,null,null,null,null,null},
-											 {7,6,null,null,null,3,null,null,2},
-											 {null,null,2,6,4,null,null,null,9},
-											 {4,null,3,9,null,null,null,7,null},
-											 {null,null,null,null,null,4,9,null,3},
-											 {null,null,5,null,null,null,null,2,null},
-											 {null,1,null,5,6,null,null,null,null},
-											 {3,7,null,null,9,null,null,4,1},
-											 {null,null,null,null,null,null,null,6,null} };
-
-
-				for(int i=0;i<ROWS;i++)
+				for(int j=0;j<COLS;j++)
 				{
-					for(int j=0;j<COLS;j++)
-					{
-						fillInMap[i][j].setNum(testingTheYes[i][j]);
-					}
+					fillInMap[i][j].setNum(testingTheYes[i][j]);
 				}
-
-				finalAct();
 			}
+
+			finalAct();
+		}
+	};
+
+	Action HiddenSingleAction = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			Integer[][] testingTheYesYes = { {null,1,null,9,null,null,7,4,null},
+										 {null,null,null,8,null,null,null,null,3},
+										 {null,7,null,null,2,null,6,9,null},
+										 {null,null,4,null,3,null,2,null,null},
+										 {null,null,null,6,null,2,null,null,null},
+										 {null,null,8,null,1,null,3,null,null},
+										 {null,8,1,null,7,null,null,3,null},
+										 {3,null,null,null,null,8,null,null,null},
+										 {null,6,9,null,null,3,null,2,null} };
+
+			for(int i=0;i<ROWS;i++)
+			{
+				for(int j=0;j<COLS;j++)
+				{
+					fillInMap[i][j].setNum(testingTheYesYes[i][j]);
+				}
+			}
+
+			finalAct();
+		}
+	};
+
+	Action PointingPairAction1 = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			Integer[][] testingTheYes = { {9,8,4,null,null,null,null,null,null},
+										 {null,null,null,5,null,null,null,4,null},
+										 {null,null,null,null,null,null,null,null,2},
+										 {null,null,6,null,9,7,2,null,null},
+										 {null,null,3,null,null,2,null,null,null},
+										 {null,null,null,null,null,null,null,1,null},
+										 {null,null,5,null,6,null,null,null,3},
+										 {4,null,7,null,5,1,8,9,null},
+										 {null,3,null,null,null,9,7,null,null} };
+
+			for(int i=0;i<ROWS;i++)
+			{
+				for(int j=0;j<COLS;j++)
+				{
+					fillInMap[i][j].setNum(testingTheYes[i][j]);
+				}
+			}
+
+			finalAct();
+		}
+	};
+
+	Action PointingPairAction2 = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			Integer[][] testingTheYesYes = { {3,4,null,null,null,6,null,7,null},
+										 {null,8,null,null,null,null,9,3,null},
+										 {null,null,2,null,null,null,null,6,null},
+										 {null,null,null,null,1,null,null,null,null},
+										 {null,9,7,null,null,null,8,5,null},
+										 {null,null,null,null,null,2,null,null,null},
+										 {null,null,null,null,null,null,null,null,null},
+										 {null,null,null,6,null,8,null,9,null},
+										 {null,null,null,9,2,3,7,8,5} };
+
+			for(int i=0;i<ROWS;i++)
+			{
+				for(int j=0;j<COLS;j++)
+				{
+					fillInMap[i][j].setNum(testingTheYesYes[i][j]);
+				}
+			}
+
+			finalAct();
+		}
+	};
+
+	Action ClaimingPairAction1 = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			Integer[][] testingTheYes = { {null,1,null,null,null,null,4,null,null},
+										  {null,null,null,6,null,3,null,null,null},
+										  {null,null,6,null,8,null,null,null,3},
+										  {8,null,null,9,5,null,1,null,null},
+										  {null,2,null,4,null,null,null,5,8},
+										  {7,9,5,null,null,null,null,null,null},
+										  {null,null,null,5,null,null,7,null,null},
+										  {null,null,null,null,null,7,null,null,null},
+										  {null,null,null,null,3,null,6,4,1} };
+
+			for(int i=0;i<ROWS;i++)
+			{
+				for(int j=0;j<COLS;j++)
+				{
+					fillInMap[i][j].setNum(testingTheYes[i][j]);
+				}
+			}
+
+			finalAct();
+		}
+	};
+
+	Action ClaimingPairAction2 = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			Integer[][] testingTheYes = { {null,6,2,null,null,8,null,null,1},
+										  {9,null,null,null,null,null,null,null,6},
+										  {null,null,null,null,null,null,null,8,null},
+										  {4,7,8,null,null,null,null,null,null},
+										  {null,null,null,null,null,9,null,7,3},
+										  {null,null,null,null,null,null,4,2,null},
+										  {null,null,5,null,null,1,null,null,null},
+										  {null,null,7,6,8,null,3,null,null},
+										  {null,null,null,null,3,2,7,null,8} };
+
+			for(int i=0;i<ROWS;i++)
+			{
+				for(int j=0;j<COLS;j++)
+				{
+					fillInMap[i][j].setNum(testingTheYes[i][j]);
+				}
+			}
+
+			finalAct();
+		}
+	};
+
+	Action NakedPairAction1 = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			Integer[][] testingTheYes = { {7,null,null,null,null,9,null,3,null},
+										 {null,null,null,1,null,5,null,null,6},
+										 {4,null,null,2,6,null,null,null,9},
+										 {null,null,2,null,8,3,9,5,1},
+										 {null,null,7,null,null,null,null,null,null},
+										 {null,null,5,6,null,null,null,null,null},
+										 {null,null,null,null,null,null,null,null,3},
+										 {1,null,null,null,null,null,null,6,null},
+										 {null,null,null,null,null,4,null,1,null} };
+
+			for(int i=0;i<ROWS;i++)
+			{
+				for(int j=0;j<COLS;j++)
+				{
+					fillInMap[i][j].setNum(testingTheYes[i][j]);
+				}
+			}
+
+			finalAct();
+		}
+	};
+
+	Action NakedPairAction2 = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			Integer[][] testingTheYesYes = { {null,null,7,null,null,4,null,2,null},
+										 {null,null,null,null,null,2,6,null,null},
+										 {null,4,null,null,5,6,null,7,8},
+										 {3,1,null,null,null,null,null,4,null},
+										 {null,6,null,null,null,null,3,null,null},
+										 {null,null,null,null,null,null,null,null,1},
+										 {null,9,6,null,null,1,null,null,null},
+										 {2,null,null,null,null,null,null,5,7},
+										 {null,null,null,null,null,null,null,6,null} };
+
+			for(int i=0;i<ROWS;i++)
+			{
+				for(int j=0;j<COLS;j++)
+				{
+					fillInMap[i][j].setNum(testingTheYesYes[i][j]);
+				}
+			}
+
+			finalAct();
+		}
+	};
+
+	Action HiddenPairAction1 = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			Integer[][] testingTheYes = { {null,null,null,null,3,2,null,null,null},
+										 {null,null,null,null,null,null,null,null,null},
+										 {null,null,7,6,null,null,9,1,4},
+										 {null,9,6,null,null,null,8,null,null},
+										 {null,null,5,null,null,8,null,null,null},
+										 {null,3,null,null,4,null,null,null,5},
+										 {null,5,null,2,null,null,null,null,null},
+										 {7,null,null,null,null,null,5,6,null},
+										 {9,null,4,null,1,null,null,null,null} };
+
+			for(int i=0;i<ROWS;i++)
+			{
+				for(int j=0;j<COLS;j++)
+				{
+					fillInMap[i][j].setNum(testingTheYes[i][j]);
+				}
+			}
+
+			finalAct();
+		}
+	};
+
+	Action HiddenPairAction2 = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			Integer[][] testingTheYesYes = { {null,null,null,null,null,null,null,null,null},
+										 {null,null,null,null,4,2,7,3,null},
+										 {null,null,6,7,null,null,null,4,null},
+										 {null,9,4,null,null,null,null,null,null},
+										 {null,null,null,null,9,6,null,null,null},
+										 {null,null,7,null,null,null,null,2,3},
+										 {1,null,null,null,null,null,null,8,5},
+										 {null,6,null,null,8,null,2,7,null},
+										 {null,null,5,null,1,null,null,null,null} };
+
+			for(int i=0;i<ROWS;i++)
+			{
+				for(int j=0;j<COLS;j++)
+				{
+					fillInMap[i][j].setNum(testingTheYesYes[i][j]);
+				}
+			}
+
+			finalAct();
+		}
+	};
+
+	Action NakedTripleAction1 = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			Integer[][] testingTheYes = { {null,null,null,null,null,4,null,null,null},
+										 {null,null,null,1,7,null,6,null,null},
+										 {4,8,null,3,5,6,1,null,null},
+										 {null,null,4,null,null,7,5,null,null},
+										 {null,null,null,null,1,null,7,null,null},
+										 {5,null,null,null,2,null,null,3,4},
+										 {9,5,null,null,null,null,null,null,6},
+										 {1,2,null,null,null,null,null,null,8},
+										 {null,null,null,null,null,null,null,null,null} };
+
+			for(int i=0;i<ROWS;i++)
+			{
+				for(int j=0;j<COLS;j++)
+				{
+					fillInMap[i][j].setNum(testingTheYes[i][j]);
+				}
+			}
+
+			finalAct();
+		}
+	};
+
+	Action NakedTripleAction2 = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			Integer[][] testingTheYesYes = { {3,9,null,null,null,null,null,null,null},
+										 {null,null,null,null,null,null,6,5,null},
+										 {null,null,7,null,null,null,3,4,9},
+										 {null,null,9,3,8,null,null,null,6},
+										 {null,null,null,null,5,4,null,null,null},
+										 {8,5,3,null,null,null,null,null,null},
+										 {null,null,null,8,null,null,1,null,null},
+										 {null,null,2,9,4,null,null,6,null},
+										 {4,null,null,null,null,null,null,null,7} };
+
+			for(int i=0;i<ROWS;i++)
+			{
+				for(int j=0;j<COLS;j++)
+				{
+					fillInMap[i][j].setNum(testingTheYesYes[i][j]);
+				}
+			}
+
+			finalAct();
+		}
+	};
+
+	Action HiddenTripleAction1 = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			Integer[][] testingTheYes = { {2,null,null,null,null,null,4,null,null},
+										 {5,null,null,null,null,null,null,null,6},
+										 {null,null,1,null,3,4,null,8,null},
+										 {null,null,null,5,null,null,null,4,null},
+										 {null,null,null,null,null,null,null,null,null},
+										 {null,6,null,7,9,null,null,null,null},
+										 {null,9,null,2,null,null,6,null,null},
+										 {null,null,3,null,null,9,null,null,1},
+										 {null,null,null,null,8,null,null,3,7} };
+
+
+			for(int i=0;i<ROWS;i++)
+			{
+				for(int j=0;j<COLS;j++)
+				{
+					fillInMap[i][j].setNum(testingTheYes[i][j]);
+				}
+			}
+
+			finalAct();
+		}
+	};
+
+	Action HiddenTripleAction2 = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			Integer[][] testingTheYesYes = { {5,null,null,6,2,null,null,3,7},
+										 {null,null,4,8,9,null,null,null,null},
+										 {null,null,null,null,5,null,null,null,null},
+										 {9,3,null,null,null,null,null,null,null},
+										 {null,2,null,null,null,null,6,null,5},
+										 {7,null,null,null,null,null,null,null,3},
+										 {null,null,null,null,null,9,null,null,null},
+										 {null,null,null,null,null,null,7,null,null},
+										 {6,8,null,5,7,null,null,null,2} };
+
+
+			for(int i=0;i<ROWS;i++)
+			{
+				for(int j=0;j<COLS;j++)
+				{
+					fillInMap[i][j].setNum(testingTheYesYes[i][j]);
+				}
+			}
+
+			finalAct();
+		}
+	};
+
+	Action NakedQuadAction1 = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			Integer[][] testingTheYes = { {null,null,null,null,null,null,null,6,null},
+										 {null,null,null,null,3,null,null,4,7},
+										 {null,3,2,5,null,null,null,null,null},
+										 {6,null,null,null,null,7,null,null,5},
+										 {2,null,7,null,1,null,9,null,8},
+										 {null,8,1,null,null,4,null,null,null},
+										 {null,null,null,null,null,2,null,null,null},
+										 {null,null,null,null,null,null,null,null,1},
+										 {null,null,5,8,7,null,null,null,null} };
+
+
+			for(int i=0;i<ROWS;i++)
+			{
+				for(int j=0;j<COLS;j++)
+				{
+					fillInMap[i][j].setNum(testingTheYes[i][j]);
+				}
+			}
+
+			finalAct();
+		}
+	};
+
+	Action NakedQuadAction2 = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			Integer[][] testingTheYesYes = { {null,3,null,null,8,null,null,null,null},
+										 {9,null,8,null,4,1,null,null,null},
+										 {null,null,1,9,null,null,2,null,7},
+										 {null,2,5,4,null,null,6,null,null},
+										 {null,null,3,null,1,7,null,5,null},
+										 {7,null,null,null,null,null,null,null,null},
+										 {null,null,null,null,null,null,null,null,null},
+										 {null,null,null,null,null,5,1,null,6},
+										 {null,null,null,3,null,null,null,9,8} };
+
+
+			for(int i=0;i<ROWS;i++)
+			{
+				for(int j=0;j<COLS;j++)
+				{
+					fillInMap[i][j].setNum(testingTheYesYes[i][j]);
+				}
+			}
+
+			finalAct();
+		}
+	};
+
+	Action HiddenQuadAction1 = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			Integer[][] testingTheYes = { {8,null,null,5,7,null,2,9,null},
+										 {3,9,null,null,null,null,null,null,null},
+										 {null,null,null,2,null,null,null,null,null},
+										 {null,null,1,null,null,null,5,null,8},
+										 {null,null,null,4,9,6,null,null,null},
+										 {null,null,null,8,null,null,null,null,null},
+										 {2,null,9,null,null,null,null,null,1},
+										 {null,null,8,null,null,null,null,7,null},
+										 {5,6,null,null,null,null,null,8,2} };
+
+
+			for(int i=0;i<ROWS;i++)
+			{
+				for(int j=0;j<COLS;j++)
+				{
+					fillInMap[i][j].setNum(testingTheYes[i][j]);
+				}
+			}
+
+			finalAct();
+		}
+	};
+
+	Action HiddenQuadAction2 = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			Integer[][] testingTheYesYes = { {null,3,null,null,null,null,null,1,null},
+										 {null,null,8,null,9,null,null,null,null},
+										 {4,null,null,6,null,8,null,null,null},
+										 {null,null,null,null,7,6,9,4,null},
+										 {null,null,null,null,null,null,5,2,null},
+										 {null,null,null,1,2,4,null,null,null},
+										 {2,null,6,null,null,null,1,9,null},
+										 {null,null,null,7,null,null,null,null,null},
+										 {null,9,5,null,null,null,4,7,null} };
+
+
+			for(int i=0;i<ROWS;i++)
+			{
+				for(int j=0;j<COLS;j++)
+				{
+					fillInMap[i][j].setNum(testingTheYesYes[i][j]);
+				}
+			}
+
+			finalAct();
+		}
+	};
+
+	Action XWingAction1 = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			Integer[][] testingTheYes = { {null,null,null,null,null,null,null,null,null},
+										 {7,6,null,null,null,3,null,null,2},
+										 {null,null,2,6,4,null,null,null,9},
+										 {4,null,3,9,null,null,null,7,null},
+										 {null,null,null,null,null,4,9,null,3},
+										 {null,null,5,null,null,null,null,2,null},
+										 {null,1,null,5,6,null,null,null,null},
+										 {3,7,null,null,9,null,null,4,1},
+										 {null,null,null,null,null,null,null,6,null} };
+
+
+			for(int i=0;i<ROWS;i++)
+			{
+				for(int j=0;j<COLS;j++)
+				{
+					fillInMap[i][j].setNum(testingTheYes[i][j]);
+				}
+			}
+
+			finalAct();
+		}
+	};
+
+	Action XWingAction2 = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			Integer[][] testingTheYes = { {9,null,null,null,6,2,7,null,null},
+										 {null,null,5,null,null,3,null,null,null},
+										 {null,null,null,null,null,null,null,null,6},
+										 {7,null,null,null,3,null,null,null,null},
+										 {null,null,null,null,null,9,null,null,null},
+										 {8,null,2,null,4,5,null,null,9},
+										 {null,null,3,5,null,1,null,2,8},
+										 {null,4,null,null,null,null,null,null,5},
+										 {null,1,null,null,null,null,null,null,null} };
+
+
+			for(int i=0;i<ROWS;i++)
+			{
+				for(int j=0;j<COLS;j++)
+				{
+					fillInMap[i][j].setNum(testingTheYes[i][j]);
+				}
+			}
+
+			finalAct();
+		}
+	};
+
+	Action SwordfishAction1 = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			Integer[][] testingTheYes = { {1,6,null,5,4,null,null,7,null},
+										 {null,null,8,null,null,1,null,3,null},
+										 {null,3,null,8,null,null,null,null,null},
+										 {7,null,null,null,5,null,null,6,9},
+										 {6,null,null,9,null,2,null,5,7},
+										 {null,null,null,null,null,null,null,null,null},
+										 {null,null,null,null,3,null,null,4,null},
+										 {null,null,null,null,null,null,null,1,6},
+										 {null,null,null,1,6,4,5,null,null} };
+
+
+			for(int i=0;i<ROWS;i++)
+			{
+				for(int j=0;j<COLS;j++)
+				{
+					fillInMap[i][j].setNum(testingTheYes[i][j]);
+				}
+			}
+
+			finalAct();
+		}
+	};
+
+	Action SwordfishAction2 = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			Integer[][] testingTheYes = { {1,5,null,null,null,3,9,null,null},
+										 {null,null,null,null,null,null,8,null,null},
+										 {null,null,null,null,5,null,null,null,null},
+										 {null,3,8,6,null,null,2,null,7},
+										 {null,null,null,null,null,null,null,null,8},
+										 {null,2,null,5,null,null,6,null,null},
+										 {null,null,null,null,4,6,null,null,9},
+										 {3,7,null,null,null,null,1,null,null},
+										 {4,8,null,3,null,2,null,null,null} };
+
+
+			for(int i=0;i<ROWS;i++)
+			{
+				for(int j=0;j<COLS;j++)
+				{
+					fillInMap[i][j].setNum(testingTheYes[i][j]);
+				}
+			}
+
+			finalAct();
+		}
+	};
+
+	Action JellyfishAction1 = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			Integer[][] testingTheYes = { {2,null,null,null,null,null,null,null,3},
+										 {null,8,null,null,3,null,null,5,null},
+										 {null,null,3,4,null,2,1,null,null},
+										 {null,null,1,2,null,5,4,null,null},
+										 {null,null,null,null,9,null,null,null,null},
+										 {null,null,9,3,null,8,6,null,null},
+										 {null,null,2,5,null,6,9,null,null},
+										 {null,9,null,null,2,null,null,7,null},
+										 {4,null,null,null,null,null,null,null,1} };
+
+
+			for(int i=0;i<ROWS;i++)
+			{
+				for(int j=0;j<COLS;j++)
+				{
+					fillInMap[i][j].setNum(testingTheYes[i][j]);
+				}
+			}
+
+			finalAct();
+		}
+	};
+
+	Action JellyfishAction2 = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			Integer[][] testingTheYes = { {2,null,null,null,null,6,null,3,null},
+										 {null,null,null,null,null,1,null,null,2},
+										 {null,null,null,null,5,null,1,null,6},
+										 {null,null,4,9,null,8,5,null,3},
+										 {null,2,null,null,1,null,null,4,null},
+										 {3,null,5,4,null,2,8,null,null},
+										 {5,null,6,null,9,null,null,null,null},
+										 {8,null,null,6,null,null,null,null,null},
+										 {null,1,null,8,null,null,null,null,4} };
+
+
+			for(int i=0;i<ROWS;i++)
+			{
+				for(int j=0;j<COLS;j++)
+				{
+					fillInMap[i][j].setNum(testingTheYes[i][j]);
+				}
+			}
+
+			finalAct();
+		}
+	};
+
+	Action XYWingAction1 = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			Integer[][] testingTheYes = {{null,null,null,null,6,null,null,null,null},
+										 {null,null,null,null,1,null,8,6,3},
+										 {null,null,3,null,null,9,null,null,null},
+										 {9,null,4,null,null,null,null,null,null},
+										 {3,null,null,null,null,null,7,null,4},
+										 {5,7,null,8,2,null,null,null,null},
+										 {null,null,null,null,null,6,5,8,null},
+										 {6,9,null,null,null,7,null,null,null},
+										 {null,null,null,null,4,null,null,3,null} };
+
+
+			for(int i=0;i<ROWS;i++)
+			{
+				for(int j=0;j<COLS;j++)
+				{
+					fillInMap[i][j].setNum(testingTheYes[i][j]);
+				}
+			}
+
+			finalAct();
+		}
+	};
+
+	Action XYWingAction2 = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			Integer[][] testingTheYes = {{null,1,null,null,null,null,5,null,8},
+										 {null,null,null,4,null,3,null,null,null},
+										 {null,5,6,7,null,null,null,null,null},
+										 {null,null,null,null,2,null,null,8,null},
+										 {4,null,null,null,null,null,3,null,2},
+										 {2,null,null,3,7,6,null,null,1},
+										 {9,null,8,null,null,null,2,5,4},
+										 {null,null,null,null,null,7,null,null,null},
+										 {null,null,null,null,null,null,null,null,3} };
+
+
+			for(int i=0;i<ROWS;i++)
+			{
+				for(int j=0;j<COLS;j++)
+				{
+					fillInMap[i][j].setNum(testingTheYes[i][j]);
+				}
+			}
+
+			finalAct();
+		}
 	};
 
 
-	// Test Sudoku #2
-
-	Action secondTestCase = new AbstractAction()
-	{
-			public void actionPerformed(ActionEvent e)
-			{
-				Integer[][] testingTheYes = { {9,null,null,null,6,2,7,null,null},
-											 {null,null,5,null,null,3,null,null,null},
-											 {null,null,null,null,null,null,null,null,6},
-											 {7,null,null,null,3,null,null,null,null},
-											 {null,null,null,null,null,9,null,null,null},
-											 {8,null,2,null,4,5,null,null,9},
-											 {null,null,3,5,null,1,null,2,8},
-											 {null,4,null,null,null,null,null,null,5},
-											 {null,1,null,null,null,null,null,null,null} };
-
-
-				for(int i=0;i<ROWS;i++)
-				{
-					for(int j=0;j<COLS;j++)
-					{
-						fillInMap[i][j].setNum(testingTheYes[i][j]);
-					}
-				}
-
-				finalAct();
-			}
-	};
-
-
-	// Test Sudoku #3
-
-	Action thirdTestCase = new AbstractAction()
-	{
-			public void actionPerformed(ActionEvent e)
-			{
-				Integer[][] testingTheYes = { {1,6,null,5,4,null,null,7,null},
-											 {null,null,8,null,null,1,null,3,null},
-											 {null,3,null,8,null,null,null,null,null},
-											 {7,null,null,null,5,null,null,6,9},
-											 {6,null,null,9,null,2,null,5,7},
-											 {null,null,null,null,null,null,null,null,null},
-											 {null,null,null,null,3,null,null,4,null},
-											 {null,null,null,null,null,null,null,1,6},
-											 {null,null,null,1,6,4,5,null,null} };
-
-
-				for(int i=0;i<ROWS;i++)
-				{
-					for(int j=0;j<COLS;j++)
-					{
-						fillInMap[i][j].setNum(testingTheYes[i][j]);
-					}
-				}
-
-				finalAct();
-			}
-	};
-
-
-	// Test Sudoku #4
-
-	Action fourthTestCase = new AbstractAction()
-	{
-			public void actionPerformed(ActionEvent e)
-			{
-				Integer[][] testingTheYes = { {1,5,null,null,null,3,9,null,null},
-											 {null,null,null,null,null,null,8,null,null},
-											 {null,null,null,null,5,null,null,null,null},
-											 {null,3,8,6,null,null,2,null,7},
-											 {null,null,null,null,null,null,null,null,8},
-											 {null,2,null,5,null,null,6,null,null},
-											 {null,null,null,null,4,6,null,null,9},
-											 {3,7,null,null,null,null,1,null,null},
-											 {4,8,null,3,null,2,null,null,null} };
-
-
-				for(int i=0;i<ROWS;i++)
-				{
-					for(int j=0;j<COLS;j++)
-					{
-						fillInMap[i][j].setNum(testingTheYes[i][j]);
-					}
-				}
-
-				finalAct();
-			}
-	};
-
-
-	// Test Sudoku #5
-
-	Action fifthTestCase = new AbstractAction()
-	{
-			public void actionPerformed(ActionEvent e)
-			{
-				Integer[][] testingTheYes = { {2,null,null,null,null,null,null,null,3},
-											 {null,8,null,null,3,null,null,5,null},
-											 {null,null,3,4,null,2,1,null,null},
-											 {null,null,1,2,null,5,4,null,null},
-											 {null,null,null,null,9,null,null,null,null},
-											 {null,null,9,3,null,8,6,null,null},
-											 {null,null,2,5,null,6,9,null,null},
-											 {null,9,null,null,2,null,null,7,null},
-											 {4,null,null,null,null,null,null,null,1} };
-
-
-				for(int i=0;i<ROWS;i++)
-				{
-					for(int j=0;j<COLS;j++)
-					{
-						fillInMap[i][j].setNum(testingTheYes[i][j]);
-					}
-				}
-
-				finalAct();
-			}
-	};
-
-
-	// Test Sudoku #6
-
-	Action sixthTestCase = new AbstractAction()
-	{
-			public void actionPerformed(ActionEvent e)
-			{
-				Integer[][] testingTheYes = { {2,null,null,null,null,6,null,3,null},
-											 {null,null,null,null,null,1,null,null,2},
-											 {null,null,null,null,5,null,1,null,6},
-											 {null,null,4,9,null,8,5,null,3},
-											 {null,2,null,null,1,null,null,4,null},
-											 {3,null,5,4,null,2,8,null,null},
-											 {5,null,6,null,9,null,null,null,null},
-											 {8,null,null,6,null,null,null,null,null},
-											 {null,1,null,8,null,null,null,null,4} };
-
-
-				for(int i=0;i<ROWS;i++)
-				{
-					for(int j=0;j<COLS;j++)
-					{
-						fillInMap[i][j].setNum(testingTheYes[i][j]);
-					}
-				}
-
-				finalAct();
-			}
-	};
-
+	// Enact solving procedures & resulting visual adjustments
 
 	protected void finalAct()
 	{
@@ -414,18 +950,7 @@ public class DrawNumsConstructor extends PaintedObjects
 		// The part where the numbers we inserted are sent to the
 		// Sudoku Solver, in which the solving occurs
 
-		theSudokuWeSendTo = new SudokuSolve(stringCompForFinal);
-
-/*
-		// Debugging (Make sure square will not be solved)
-
-		Integer[] quickCheck = theSudokuWeSendTo.getPossArray(3,6);
-		for(int theCheck=0;theCheck<9;theCheck++)
-		{
-			if(quickCheck[theCheck] != null)
-				System.out.println(quickCheck[theCheck]);
-		}
-*/
+		theSudokuWeSendTo = new SudokuSolveHumanMethods(stringCompForFinal);
 
 
 		// Solving procedures finished
@@ -463,6 +988,41 @@ public class DrawNumsConstructor extends PaintedObjects
 		textToWorkWith.setNumSquaresSolved(theSudokuWeSendTo.mySudoku.squaresSolved);
 		textToWorkWith.setCompletionCode(theSudokuWeSendTo.mySudoku.isPuzzleComplete());
 		textToWorkWith.repaint();
+	}
+
+
+	// Maps debugging keys to debugging actions
+
+	public void setDebugActions()
+	{
+		setTheAction(NakedSingleKey,"NakedSingleString",NakedSingleAction);
+		setTheAction(HiddenSingleKey,"HiddenSingleString",HiddenSingleAction);
+		setTheAction(PointingPairKey1,"PointingPairString1",PointingPairAction1);
+		setTheAction(PointingPairKey2,"PointingPairString2",PointingPairAction2);
+		setTheAction(ClaimingPairKey1,"ClaimingPairString1",ClaimingPairAction1);
+		setTheAction(ClaimingPairKey2,"ClaimingPairString2",ClaimingPairAction2);
+		setTheAction(NakedPairKey1,"NakedPairString1",NakedPairAction1);
+		setTheAction(NakedPairKey2,"NakedPairString2",NakedPairAction2);
+		setTheAction(HiddenPairKey1,"HiddenPairString1",HiddenPairAction1);
+		setTheAction(HiddenPairKey2,"HiddenPairString2",HiddenPairAction2);
+		setTheAction(NakedTripleKey1,"NakedTripleString1",NakedTripleAction1);
+		setTheAction(NakedTripleKey2,"NakedTripleString2",NakedTripleAction2);
+		setTheAction(HiddenTripleKey1,"HiddenTripleString1",HiddenTripleAction1);
+		setTheAction(HiddenTripleKey2,"HiddenTripleString2",HiddenTripleAction2);
+		setTheAction(NakedQuadKey1,"NakedQuadString1",NakedQuadAction1);
+		setTheAction(NakedQuadKey2,"NakedQuadString2",NakedQuadAction2);
+		setTheAction(HiddenQuadKey1,"HiddenQuadString1",HiddenQuadAction1);
+		setTheAction(HiddenQuadKey2,"HiddenQuadString2",HiddenQuadAction2);
+		setTheAction(XWingKey1,"XWingString1",XWingAction1);
+		setTheAction(XWingKey2,"XWingString2",XWingAction2);
+		setTheAction(SwordfishKey1,"SwordfishString1",SwordfishAction1);
+		setTheAction(SwordfishKey2,"SwordfishString2",SwordfishAction2);
+		setTheAction(JellyfishKey1,"JellyfishString1",JellyfishAction1);
+		setTheAction(JellyfishKey2,"JellyfishString2",JellyfishAction2);
+		setTheAction(XYWingKey1,"XYWingString1",XYWingAction1);
+		setTheAction(XYWingKey2,"XYWingString2",XYWingAction2);
+
+		// Add the rest of the test Sudoku you've been using
 	}
 
 
@@ -516,12 +1076,7 @@ public class DrawNumsConstructor extends PaintedObjects
 
 				setTheAction(pressEnter,"enterAction",enterAction);
 
-				setTheAction(variableTest1,"firstTestCase",firstTestCase);
-				setTheAction(variableTest2,"secondTestCase",secondTestCase);
-				setTheAction(variableTest3,"thirdTestCase",thirdTestCase);
-				setTheAction(variableTest4,"fourthTestCase",fourthTestCase);
-				setTheAction(variableTest5,"fifthTestCase",fifthTestCase);
-				setTheAction(variableTest6,"sixthTestCase",sixthTestCase);
+				setDebugActions();
 
 				itsTheSolveButton.setEnabled(true);
 				itsTheUndoSolveButton.setEnabled(false);
@@ -579,12 +1134,7 @@ public class DrawNumsConstructor extends PaintedObjects
 
 				setTheAction(pressEnter,"enterAction",enterAction);
 
-				setTheAction(variableTest1,"firstTestCase",firstTestCase);
-				setTheAction(variableTest2,"secondTestCase",secondTestCase);
-				setTheAction(variableTest3,"thirdTestCase",thirdTestCase);
-				setTheAction(variableTest4,"fourthTestCase",fourthTestCase);
-				setTheAction(variableTest5,"fifthTestCase",fifthTestCase);
-				setTheAction(variableTest6,"sixthTestCase",sixthTestCase);
+				setDebugActions();
 
 				itsTheSolveButton.setEnabled(true);
 				itsTheUndoSolveButton.setEnabled(false);
@@ -593,6 +1143,9 @@ public class DrawNumsConstructor extends PaintedObjects
 			}
 		}
 	};
+
+
+
 
 
 	// Constructor!!!
@@ -749,13 +1302,7 @@ public class DrawNumsConstructor extends PaintedObjects
 
 		setTheAction(pressEnter,"enterAction",enterAction);
 
-		setTheAction(variableTest1,"firstTestCase",firstTestCase);
-		setTheAction(variableTest2,"secondTestCase",secondTestCase);
-		setTheAction(variableTest3,"thirdTestCase",thirdTestCase);
-		setTheAction(variableTest4,"fourthTestCase",fourthTestCase);
-		setTheAction(variableTest5,"fifthTestCase",fifthTestCase);
-		setTheAction(variableTest6,"sixthTestCase",sixthTestCase);
-
+		setDebugActions();
 
 		// Last bit of JFrame setup
 
