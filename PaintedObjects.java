@@ -31,24 +31,27 @@ public class PaintedObjects extends JFrame
 	protected static int ROWS = 9;
 	protected static int COLS = 9;
 
-	// Current row & column of the rectangle. Crucial!
+	// Color and size of the square highlight
+
+	private static Color ourRectColor = new Color(28,222,144);
+	protected static int ourRectWidth = 60;
+	protected static int ourRectHeight = 60;
+
+	// Current row & column of the square highlight
 
 	protected static int currentRow = 0;
 	protected static int currentCol = 0;
 
-	// Color and size of the moving rectangle are assigned
-	// up here, since they will never change. The location
-	// of the Point relies on the fillInMap that pops up
-	// only when the program starts running, so it is
-	// merely declared here
-
-	private Color ourRectColor = new Color(28,222,144);
-	protected int ourRectWidth = 60;
-	protected int ourRectHeight = 60;
+	// Exact location of the square highlight
 
 	protected static Point ourRecLocation = new Point(100,100);
 
-	protected static Boolean controlsOn = true;
+	// Whether the arrow keys will currently move the square around
+	// and the number keys will enter numbers into the Sudoku
+
+	protected static boolean controlsOn = true;
+
+
 
 	// Rectangle object can paint itself
 
@@ -66,7 +69,6 @@ public class PaintedObjects extends JFrame
 
 
 	// OurRectangle can create a Rectangle and call paint() on it
-	// This is what is written in the algorithm to draw all of this
 
 	public class OurRectangle extends JPanel
 	{
@@ -98,7 +100,6 @@ public class PaintedObjects extends JFrame
 	{
 		protected void paint(Graphics2D g2d)
 		{
-
 			BasicStroke thickerBorder = new BasicStroke(1.5F);
 			BasicStroke normalBorder = new BasicStroke(1F);
 
@@ -149,7 +150,6 @@ public class PaintedObjects extends JFrame
 
 
 	// OurCoreGrid can create a CoreGrid and call paint() on it
-	// This is what is written in the algorithm to draw all of this
 
 	public class OurCoreGrid extends JPanel
 	{
@@ -174,12 +174,12 @@ public class PaintedObjects extends JFrame
 	} // OurCoreGrid class
 
 
-	// Get the font used for the numbers, as well as the metrics
+	// Create the fonts and the metrics
 
 	protected Color theBlack = new Color(0,0,0);
 	protected Color theRed = new Color(255,0,0);
 	protected Color theBlue = new Color(0,0,255);
-	protected Color thePurple = new Color(175,0,255);
+	protected Color thePurple = new Color(125,0,225);
 
 	protected Font myFont = new Font("TimesRoman",Font.PLAIN,42);
 	protected Canvas c1 = new Canvas();
@@ -194,19 +194,21 @@ public class PaintedObjects extends JFrame
 	protected FontMetrics possArrayFontFM = c3.getFontMetrics(possArrayFont);
 
 
+	// SolveText object can paint itself
+
 	public class SolveText
 	{
-		protected String numSquaresSolved = null;
+		protected Integer numSquaresSolved = null;
 		private String fullSquaresSolvedQuote = "";
 
 		protected int completionCode = -5;
 		private String completionMessage = "";
 
 		protected int BottomPracY = (640+(640+60))/2 - smallerFM.getHeight()/2 + smallerFM.getAscent();
-		protected int BottomPracX;   // Changes depending on what is being inserted. Probably.
+		protected int BottomPracX;
 
 		protected int TopPracY = (100+(100-60))/2 - smallerFM.getHeight()/2 + smallerFM.getAscent();
-		protected int TopPracX;   // Changes depending on what is being inserted. Probably.
+		protected int TopPracX;
 
 		protected void resetThisAll()
 		{
@@ -218,11 +220,16 @@ public class PaintedObjects extends JFrame
 
 		protected void paint(Graphics2D g2d)
 		{
-			g2d.setColor( new Color(155,50,145) );
+			g2d.setColor(thePurple);
 			g2d.setFont(smallerFont);
 
 			if(numSquaresSolved != null)
-				fullSquaresSolvedQuote = "Squares Solved: "+numSquaresSolved;
+			{
+				fullSquaresSolvedQuote = "Squares Solved: "+String.valueOf(numSquaresSolved);
+
+				if(numSquaresSolved.equals(81))
+					g2d.setColor(theBlue);
+			}
 
 			BottomPracX = (100+(100+540))/2 - smallerFM.stringWidth(fullSquaresSolvedQuote)/2;
 			g2d.drawString(fullSquaresSolvedQuote,BottomPracX,BottomPracY);
@@ -232,7 +239,7 @@ public class PaintedObjects extends JFrame
 			else if(completionCode == 1)
 				completionMessage = "Puzzle is NOT complete. There are numbers besides 1-9.";
 			else if(completionCode == 2)
-				completionMessage = "Puzzle is NOT complete. There are duplicates in a row/column/box.";
+				completionMessage = "Puzzle is NOT complete. There are dupes in a row/column/box.";
 			else if(completionCode == 3)
 				completionMessage = "Puzzle is NOT complete. There are empty spaces.";
 				
@@ -243,6 +250,8 @@ public class PaintedObjects extends JFrame
 	} // SolveText class
 
 
+	// OurSolveText can create a SolveText and call paint() on it
+
 	public class OurSolveText extends JPanel
 	{
 		private SolveText capableSolveText;
@@ -252,9 +261,9 @@ public class PaintedObjects extends JFrame
 			capableSolveText = new SolveText();
 		}
 
-		public void setNumSquaresSolved(int input)
+		public void setNumSquaresSolved(int theInput)
 		{
-			capableSolveText.numSquaresSolved = Integer.toString(input);
+			capableSolveText.numSquaresSolved = theInput;
 		}
 
 		public void setCompletionCode(int theInput)
@@ -277,15 +286,11 @@ public class PaintedObjects extends JFrame
 
 			g2d.dispose();
 		}
-	}
+
+	} // OurSolveText class
 
 
-	// NumHolder object can paint the number it holds, but needs to be aware of
-	// its own row and column in order to know where to paint that number.
-	// So, it takes its row and column as arguments in its constructor.
-
-	// It also holds a Point detailing where to draw the rectangle when it is
-	// hovering over that square of the grid.
+	// NumHolder object can paint itself
 
 	public class NumHolder
 	{
@@ -297,18 +302,13 @@ public class PaintedObjects extends JFrame
 
 		protected Point whereToDrawRec;
 
-		// These numbers are for the purpose of centering the
-		// painted number within the square. Height of the String
-		// should never change, but the length may. Just to be safe,
-		// pracX is changed within paint()
-
 		protected int pracY = (100+(100+60))/2 - fm.getHeight()/2 + fm.getAscent();
-		protected int pracX;   // Changes depending on what is being inserted. Probably.
+		protected int pracX;
 
 		protected int possArrayPracY;
 		protected int possArrayPracX;
 
-		protected Boolean beingAddedOnSolve = false;
+		protected boolean beingAddedOnSolve = false;
 
 		protected int[] howFarY = new int[]{0,0,0,20,20,20,40,40,40};
 		protected int[] howFarX = new int[]{0,20,40,0,20,40,0,20,40};
@@ -353,7 +353,6 @@ public class PaintedObjects extends JFrame
 
 			if(beingAddedOnSolve && numHeld.equals(""))
 			{
-
 				g2d.setColor(thePurple);
 
 				g2d.setFont(possArrayFont);
@@ -395,8 +394,6 @@ public class PaintedObjects extends JFrame
 
 
 	// OurNumHolder can create a NumHolder and call paint() on it
-	// It can also change the numHeld and retrieve the Point for the Rectangle
-	// This is what is written in the algorithm to draw all of this
 
 	public class OurNumHolder extends JPanel
 	{
@@ -418,6 +415,11 @@ public class PaintedObjects extends JFrame
 		protected String getNum()
 		{
 			return capableNumHolder.numHeld;
+		}
+
+		protected boolean getSolveAddStatus()
+		{
+			return capableNumHolder.beingAddedOnSolve;
 		}
 
 		protected void setFinalPossArray(Integer[] Input)
@@ -463,7 +465,7 @@ public class PaintedObjects extends JFrame
 	} // OurNumHolder class
 
 
-	// Reset Button
+	// ClickButton. It's a button.
 
 	public class ClickButton extends JButton
 	{
@@ -474,9 +476,10 @@ public class PaintedObjects extends JFrame
 			capableButton = new JButton();
 		}
 
-	} // TestButton class
+	} // ClickButton class
 
-} // PaintedObjects, our outermost class
+} // PaintedObjects
+
 
 class Square
 {
@@ -484,7 +487,7 @@ class Square
 	protected Integer result; // The final number that you see
 	protected Integer[] possArray; // Every possible number it could still be
 
-	protected Boolean answerAtStart = false;
+	protected boolean answerAtStart = false;
 
 	protected int ownRow;
 	protected int ownCol;
