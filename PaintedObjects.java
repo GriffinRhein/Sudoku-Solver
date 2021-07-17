@@ -227,7 +227,7 @@ public class PaintedObjects extends JFrame
 			{
 				fullSquaresSolvedQuote = "Squares Solved: "+String.valueOf(numSquaresSolved);
 
-				if(numSquaresSolved.equals(81))
+				if(completionCode == 0)
 					g2d.setColor(theBlue);
 			}
 
