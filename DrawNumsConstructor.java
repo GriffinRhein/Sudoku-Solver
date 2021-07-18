@@ -67,7 +67,10 @@ public class DrawNumsConstructor extends PaintedObjects
 
 	StringRetriever itsTheStringRetriever = new StringRetriever(this);
 
-	SudokuSolveHumanMethods theSudokuWeSendTo;
+	FullSudoku ourSentSudoku;
+	SolveChecker ourSolveChecker;
+
+	SudokuSolveHumanMethods inputForSolving;
 
 
 	// Create InputMap and ActionMap
@@ -232,48 +235,78 @@ public class DrawNumsConstructor extends PaintedObjects
 			}
 		}
 
-		// The part where the numbers we inserted are sent to the
-		// Sudoku Solver, in which the solving occurs
 
-		theSudokuWeSendTo = new SudokuSolveHumanMethods(stringCompForFinal);
+		// Create the FullSudoku and SolveChecker proper
+
+		ourSentSudoku = new FullSudoku(stringCompForFinal);
+		ourSolveChecker = new SolveChecker(ourSentSudoku);
 
 
-		// Solving procedures finished
+		// Make sure the user has not inserted duplicates within a row/column/box
 
-		for(int i=0;i<ROWS;i++)
+		if(!(ourSolveChecker.isSudokuDupeFree()))
 		{
-			for(int j=0;j<COLS;j++)
+			itsTheStringRetriever.showInsertedDupeMessage();
+		}
+		else
+		{
+			// The part where the numbers we inserted are sent to the
+			// Sudoku Solver, in which the solving occurs
+
+			inputForSolving = new SudokuSolveHumanMethods(ourSentSudoku,ourSolveChecker);
+
+
+			// On many occasions, the solving techniques assume that the puzzle has a
+			// proper solution, and puzzles with no solution will result in duplicates
+			// within a row/column/box. Duplicates will never occur in a puzzle which
+			// can be solved, so if there are duplicates here, there is no solution.
+
+			// There may be cases which are not yet caught, and this is likely where
+			// the last-resort solving methods will come in.
+
+			if(!(ourSolveChecker.isSudokuDupeFree()))
 			{
-				if(fillInMap[i][j].getNum().equals(""))
-					fillInMap[i][j].adjustSolve(true);
+				itsTheStringRetriever.showNoSolutionMessage();
+			}
+			else
+			{
+				// Solving procedures finished
 
-				fillInMap[i][j].setNum( theSudokuWeSendTo.mySudoku.SudokuMap[i][j].result );
+				for(int i=0;i<ROWS;i++)
+				{
+					for(int j=0;j<COLS;j++)
+					{
+						if(fillInMap[i][j].getNum().equals(""))
+							fillInMap[i][j].adjustSolve(true);
 
-				fillInMap[i][j].setFinalPossArray( theSudokuWeSendTo.mySudoku.SudokuMap[i][j].possArray );
+						fillInMap[i][j].setNum( ourSentSudoku.SudokuMap[i][j].result );
 
-				fillInMap[i][j].repaint();
+						fillInMap[i][j].setFinalPossArray( ourSentSudoku.SudokuMap[i][j].possArray );
+
+						fillInMap[i][j].repaint();
+					}
+				}
+
+				if(controlsOn)
+				{
+					inputMap.clear();
+					actionMap.clear();
+					itsTheSolveButton.setEnabled(false);
+					itsTheUndoSolveButton.setEnabled(true);
+					itsTheLoadSudokuButton.setEnabled(false);
+
+					controlsOn = false;
+				}
+
+				ourRectWidth = 0;
+				ourRectHeight = 0;
+
+				recToWorkWith.repaint();
+
+				textToWorkWith.setNumSquaresSolved(ourSentSudoku.squaresSolved);
+				textToWorkWith.repaint();
 			}
 		}
-
-		if(controlsOn)
-		{
-			inputMap.clear();
-			actionMap.clear();
-			itsTheSolveButton.setEnabled(false);
-			itsTheUndoSolveButton.setEnabled(true);
-			itsTheLoadSudokuButton.setEnabled(false);
-
-			controlsOn = false;
-		}
-
-		ourRectWidth = 0;
-		ourRectHeight = 0;
-
-		recToWorkWith.repaint();
-
-		textToWorkWith.setNumSquaresSolved(theSudokuWeSendTo.mySudoku.squaresSolved);
-		textToWorkWith.setCompletionCode(theSudokuWeSendTo.mySudoku.isPuzzleComplete());
-		textToWorkWith.repaint();
 	}
 
 

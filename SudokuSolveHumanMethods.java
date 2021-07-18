@@ -3,25 +3,32 @@ public class SudokuSolveHumanMethods
 	// Sudoku which everything is based upon
 
 	FullSudoku mySudoku;
+	SolveChecker mySolveChecker;
+
+
+	// Create objects containing solve methods
+
+	PointingPairsTriples TrickSolveOne;
+	ClaimingPairsTriples TrickSolveTwo;
+	NakedPairsTripsQuads TrickSolveThree;
+	HiddenPairsTripsQuads TrickSolveFour;
+	FishTwoThreeFour TrickSolveFive;
+	XY_Wing TrickSolveSix;
 
 
 	// Called by DrawNumsConstructor
 
-	public SudokuSolveHumanMethods(String[][] thisInput)
+	public SudokuSolveHumanMethods(FullSudoku a, SolveChecker b)
 	{
-		// Create sudoku
+		mySudoku = a;
+		mySolveChecker = b;
 
-		mySudoku = new FullSudoku(thisInput);
-
-
-		// Create objects containing solve methods
-
-		PointingPairsTriples TrickSolveOne = new PointingPairsTriples();
-		ClaimingPairsTriples TrickSolveTwo = new ClaimingPairsTriples();
-		NakedPairsTripsQuads TrickSolveThree = new NakedPairsTripsQuads();
-		HiddenPairsTripsQuads TrickSolveFour = new HiddenPairsTripsQuads();
-		FishTwoThreeFour TrickSolveFive = new FishTwoThreeFour();
-		XY_Wing TrickSolveSix = new XY_Wing();
+		TrickSolveOne = new PointingPairsTriples();
+		TrickSolveTwo = new ClaimingPairsTriples();
+		TrickSolveThree = new NakedPairsTripsQuads();
+		TrickSolveFour = new HiddenPairsTripsQuads();
+		TrickSolveFive = new FishTwoThreeFour();
+		TrickSolveSix = new XY_Wing();
 
 
 		// Amount of squares solved at the beginning of a loop through these

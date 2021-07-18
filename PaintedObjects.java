@@ -201,7 +201,6 @@ public class PaintedObjects extends JFrame
 		protected Integer numSquaresSolved = null;
 		private String fullSquaresSolvedQuote = "";
 
-		protected int completionCode = -5;
 		private String completionMessage = "";
 
 		protected int BottomPracY = (640+(640+60))/2 - smallerFM.getHeight()/2 + smallerFM.getAscent();
@@ -214,7 +213,6 @@ public class PaintedObjects extends JFrame
 		{
 			numSquaresSolved = null;
 			fullSquaresSolvedQuote = "";
-			completionCode = -5;
 			completionMessage = "";
 		}
 
@@ -227,21 +225,20 @@ public class PaintedObjects extends JFrame
 			{
 				fullSquaresSolvedQuote = "Squares Solved: "+String.valueOf(numSquaresSolved);
 
-				if(completionCode == 0)
+				if(numSquaresSolved.equals(81))
 					g2d.setColor(theBlue);
 			}
 
 			BottomPracX = (100+(100+540))/2 - smallerFM.stringWidth(fullSquaresSolvedQuote)/2;
 			g2d.drawString(fullSquaresSolvedQuote,BottomPracX,BottomPracY);
 
-			if(completionCode == 0)
-				completionMessage = "Puzzle is complete!";
-			else if(completionCode == 1)
-				completionMessage = "Puzzle is NOT complete. There are numbers besides 1-9.";
-			else if(completionCode == 2)
-				completionMessage = "Puzzle is NOT complete. There are dupes in a row/column/box.";
-			else if(completionCode == 3)
-				completionMessage = "Puzzle is NOT complete. There are empty spaces.";
+			if(numSquaresSolved != null)
+			{
+				if(numSquaresSolved.equals(81))
+					completionMessage = "Puzzle is complete!";
+				else
+					completionMessage = "Puzzle is NOT complete.";
+			}
 				
 			TopPracX = (100+(100+540))/2 - smallerFM.stringWidth(completionMessage)/2;
 			g2d.drawString(completionMessage,TopPracX,TopPracY);
@@ -264,11 +261,6 @@ public class PaintedObjects extends JFrame
 		public void setNumSquaresSolved(int theInput)
 		{
 			capableSolveText.numSquaresSolved = theInput;
-		}
-
-		public void setCompletionCode(int theInput)
-		{
-			capableSolveText.completionCode = theInput;
 		}
 
 		public void resetSolveText()

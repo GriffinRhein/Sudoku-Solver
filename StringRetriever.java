@@ -43,6 +43,26 @@ public class StringRetriever
 	}
 
 
+	public void showInsertedDupeMessage()
+	{
+		JOptionPane theWindow = new JOptionPane();
+
+		String dupeMessage = "You have entered duplicates within a row, column, or box.";
+
+		theWindow.showMessageDialog(parentFrame,dupeMessage,"Solve Error",JOptionPane.ERROR_MESSAGE);
+	}
+
+
+	public void showNoSolutionMessage()
+	{
+		JOptionPane theWindow = new JOptionPane();
+
+		String noSolutionMessage = "This puzzle has no solution.";
+
+		theWindow.showMessageDialog(parentFrame,noSolutionMessage,"Solve Error",JOptionPane.ERROR_MESSAGE);
+	}
+
+
 	// Error message for invalid String
 
 	public void showErrorMessage(int errorCode)
