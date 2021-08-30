@@ -3,6 +3,15 @@ public class XY_Wing
 	// Note that in an XY Wing, all three cells involved must contain EXACTLY
 	// two numbers in their possArray, or the logic does not work.
 
+	private FullSudoku mySudoku;
+	private MethodExplanations myMethods;
+
+	public XY_Wing(FullSudoku theSudoku, MethodExplanations theMethods)
+	{
+		mySudoku = theSudoku;
+		myMethods = theMethods;
+	}
+
 	private Square thePivot;
 	private Square theX;
 	private Square theY;
@@ -26,13 +35,17 @@ public class XY_Wing
 
 	private Square[] sharingRCB;
 
+	private boolean didWeGetOne;
+
 
 	// We start by going through every square in the grid. Any square which is
 	// down to exactly two possibilities may serve as a pivot, so for each square
 	// which fulfills that criteria, move on to the next step with it as the pivot
 
-	public void XY_Wing_Begin(FullSudoku mySudoku)
+	public boolean XY_Wing()
 	{
+		didWeGetOne = false;
+
 		for(int a=0;a<9;a++)
 		{
 			for(int b=0;b<9;b++)
@@ -49,11 +62,13 @@ public class XY_Wing
 					{
 						// Move on
 
-						get_pivot_poss_and_XY(mySudoku);
+						get_pivot_poss_and_XY();
 					}
 				}
 			}
 		}
+
+		return didWeGetOne;
 
 	} // XY_Wing_Begin()
 
@@ -62,7 +77,7 @@ public class XY_Wing
 	// 20 squares sharing an RCB with it is created. Then, every possible
 	// pairing of two squares from that array is sent to the next step
 
-	private void get_pivot_poss_and_XY(FullSudoku mySudoku)
+	private void get_pivot_poss_and_XY()
 	{
 		// Retrieve the 2 possibilities
 
@@ -91,18 +106,20 @@ public class XY_Wing
 
 		for(int intX=0;intX<sharingRCB.length;intX++)
 		{
-			for(int intY=0;intY<sharingRCB.length;intY++)
-			{
-				// Avoid duplicate scenarios
+			theX = sharingRCB[intX];
 
-				if(intX < intY)
+			if(theX.result == null && theX.numPossLeft == 2)
+			{
+				for(int intY=intX+1;intY<sharingRCB.length;intY++)
 				{
-					theX = sharingRCB[intX];
 					theY = sharingRCB[intY];
 
-					// Move on
+					if(theY.result == null && theY.numPossLeft == 2)
+					{
+						// Move on
 
-					get_X_and_Y_poss(mySudoku);
+						get_X_and_Y_poss();
+					}
 				}
 			}
 		}
@@ -113,52 +130,45 @@ public class XY_Wing
 	// Check whether X and Y both have 2 possibilities, and
 	// if so retrieve them before moving to the final function
 
-	private void get_X_and_Y_poss(FullSudoku mySudoku)
+	private void get_X_and_Y_poss()
 	{
-		// Make sure both squares are unsolved
-
-		if(theX.result == null && theY.result == null)
+		if(!(didWeGetOne))
 		{
-			// Make sure both squares are down to 2 possibilities
+			// Retrieve possibilities for X and Y
 
-			if(theX.numPossLeft == 2 && theY.numPossLeft == 2)
+			coolMarker = 0;
+
+			for(int c=0;c<9;c++)
 			{
-				// Retrieve possibilities for X and Y
-
-				coolMarker = 0;
-
-				for(int c=0;c<9;c++)
+				if(theX.possArray[c] != null)
 				{
-					if(theX.possArray[c] != null)
-					{
-						if(coolMarker == 0)
-							XPoss1 = theX.possArray[c];
-						else
-							XPoss2 = theX.possArray[c];
+					if(coolMarker == 0)
+						XPoss1 = theX.possArray[c];
+					else
+						XPoss2 = theX.possArray[c];
 
-						coolMarker++;
-					}
+					coolMarker++;
 				}
-
-				coolMarker = 0;
-
-				for(int c=0;c<9;c++)
-				{
-					if(theY.possArray[c] != null)
-					{
-						if(coolMarker == 0)
-							YPoss1 = theY.possArray[c];
-						else
-							YPoss2 = theY.possArray[c];
-
-						coolMarker++;
-					}
-				}
-
-				// Move on
-
-				checkAndElim(mySudoku);
 			}
+
+			coolMarker = 0;
+
+			for(int c=0;c<9;c++)
+			{
+				if(theY.possArray[c] != null)
+				{
+					if(coolMarker == 0)
+						YPoss1 = theY.possArray[c];
+					else
+						YPoss2 = theY.possArray[c];
+
+					coolMarker++;
+				}
+			}
+
+			// Move on
+
+			checkAndElim();
 		}
 
 	} // get_X_and_Y_poss()
@@ -169,7 +179,7 @@ public class XY_Wing
 	// all squares sharing an RCB with X and sharing an RCB with Y.
 	// Jsut make sure you don't knock it from X or Y themselves
 
-	private void checkAndElim(FullSudoku mySudoku)
+	private void checkAndElim()
 	{
 		// Do the Pivot & X & Y form an XY Wing?
 		// Final check before the elimination stage.
@@ -179,6 +189,10 @@ public class XY_Wing
 
 		if(doWeHaveWing)
 		{
+			boolean temp;
+
+			int newCounter = 0;
+
 			// Go through each square in the sudoku, performing
 			// eliminations on the appropriate ones
 
@@ -195,14 +209,52 @@ public class XY_Wing
 
 					if(doYouElim)
 					{
-						mySudoku.elimFromPossArray(elimTemplate,wingDigitInCommon);
+						temp = mySudoku.elimFromPossArray(elimTemplate,wingDigitInCommon);
+
+						if(temp)
+						{
+							if(!(didWeGetOne))
+							{
+								// Clear enough in myMethods to explain elimination.
+
+								// Since we don't have a specific row/column/box to work with,
+								// one integer is not sufficient to indicate a square.
+								// Clear two lines of squaresForKilledPoss.
+
+								myMethods.clearEnoughForNew(SolveMethod.XY_Wing);
+
+
+								// Put the other constants in place
+
+								myMethods.arrayOfKilledPoss[0] = wingDigitInCommon;
+
+								myMethods.SquareA = thePivot;
+								myMethods.SquareB = theX;
+								myMethods.SquareC = theY;
+
+								myMethods.miscNumsA[0] = pivotPoss1;
+								myMethods.miscNumsA[1] = XPoss1;
+								myMethods.miscNumsA[2] = YPoss1;
+
+								myMethods.miscNumsB[0] = pivotPoss2;
+								myMethods.miscNumsB[1] = XPoss2;
+								myMethods.miscNumsB[2] = YPoss2;
+
+								didWeGetOne = true;
+							}
+
+							// Absolute maximum number of squares which share a set with X
+							// and share a set with Y is 13. Since the pivot is one of them
+							// but cannot contain the eliminated digit, it is impossible for
+							// more than 12 squares to be affected by the XY_Wing
+
+							myMethods.squaresForKilledPoss[0][newCounter] = elimTemplate.ownRow;
+							myMethods.squaresForKilledPoss[1][newCounter] = elimTemplate.ownCol;
+							newCounter++;
+						}
 					}
 				}
 			}
-
-			// If we have accomplished something, activate continuousIntenseSolve()
-
-			mySudoku.continuousIntenseSolve();
 		}
 
 	} // checkAndElim()

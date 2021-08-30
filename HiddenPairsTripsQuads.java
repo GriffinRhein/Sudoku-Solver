@@ -1,46 +1,70 @@
 public class HiddenPairsTripsQuads
 {
+	private FullSudoku mySudoku;
+	private MethodExplanations myMethods;
+
+	public HiddenPairsTripsQuads(FullSudoku theSudoku, MethodExplanations theMethods)
+	{
+		mySudoku = theSudoku;
+		myMethods = theMethods;
+	}
+
 	// Handy boolean
 
-	boolean canWePass;
+	private boolean canWePass;
 
 	// Array of 9 Squares which make up the row/column/box being looked at
 
-	Square[] singleRCB;
+	private Square[] singleRCB;
+
+	// Type of set currently being looked at: Row, Column, or Box
+
+	private HouseType fullHouseType;
 
 	// int from 0 to 8 indicating the row/column/box being looked at
 
-	int whichSet;
+	private int whichHouse;
 
-	// int telling you whether the set in question is a row, column, or box. 85 for row, 86 for column, 87 for box
+	// Type of Hidden Subset being sought: Pair, Trip, or Quad
 
-	int setType;
+	private PTQ fullHiddenType;
 
 	// int for the type of Hidden Subset being sought. 2 for Pairs, 3 for Triples, 4 for Quads
 
-	int hiddenType;
+	private int hiddenType;
 
 	// Numbers being examined
 
-	int num1;
-	int num2;
-	int num3;
-	int num4;
+	private int num1;
+	private int num2;
+	private int num3;
+	private int num4;
 
-	// Relevant possPrevalence array. Initialization does not matter.
+	// Relevant possPrevalence array.
 
-	int[][] thisPossPrevalence = new int[1][1];
+	private int[][] thisPossPrevalence;
+
+	// Whether a Hidden Pair/Trip/Quad has been successfully utilized
+
+	private boolean didWeGetOne;
 
 
 	// This function is used for Hidden Pairs, Hidden Triples, and Hidden Quads.
 	// (Functions which call this one are at the bottom of this document)
 
-	private void oneSubsetTypeOneRCB(FullSudoku mySudoku, Square[] examinedRCB, int setInt, int rowOrColOrBox, int whichHidden)
+	private void oneSubsetTypeOneRCB(Square[] examinedRCB, HouseType woo, int whichSet, PTQ hoo)
 	{
 		singleRCB = examinedRCB;
-		whichSet = setInt;
-		setType = rowOrColOrBox;
-		hiddenType = whichHidden;
+		fullHouseType = woo;
+		whichHouse = whichSet;
+		fullHiddenType = hoo;
+
+		switch(fullHiddenType)
+		{
+			case Pair: hiddenType = 2; break;
+			case Trip: hiddenType = 3; break;
+			case Quad: hiddenType = 4; break;
+		}
 		
 		// For a Hidden Pair, all combinations of two different numbers from 1 through 9 must be checked
 		// For a Hidden Triple, all combinations of three different numbers from 1 through 9 must be checked
@@ -82,7 +106,7 @@ public class HiddenPairsTripsQuads
 
 						if(canWePass)
 						{
-							checkPossPrevalence(mySudoku);
+							checkPossPrevalence();
 						}
 					}
 				}
@@ -92,49 +116,54 @@ public class HiddenPairsTripsQuads
 	} // oneSubsetTypeOneRCB()
 
 
-	private void checkPossPrevalence(FullSudoku mySudoku)
+	private void checkPossPrevalence()
 	{
-		// Recall that possPrevalence of a number refers to the amount of squares
-		// in a row/column/box which still contains the number in its possArray
+		// Continue if we haven't already found a Hidden Pair/Trip/Quad
 
-		// For a Hidden Pair, all numbers must have a possPrevalence of 2
-		// For a Hidden Triple, all numbers must have a possPrevalence of 2-3
-		// For a Hidden Quad, all numbers must have a possPrevalence of 2-4
-
-		// Set thisPossPrevalence to the appropriate possPrevalence array,
-		// and for the current row/column/box retrieve the prevalance of
-		// each of the numbers. Continue if the relevant ones are acceptable.
-			
-		switch(setType)
+		if(!(didWeGetOne))
 		{
-			case 85: thisPossPrevalence = mySudoku.rowPossPrevalence; break;
-			case 86: thisPossPrevalence = mySudoku.colPossPrevalence; break;
-			case 87: thisPossPrevalence = mySudoku.boxPossPrevalence; break;
-		}
+			// Recall that possPrevalence of a number refers to the amount of squares
+			// in a row/column/box which still contains the number in its possArray
 
-		int w = thisPossPrevalence[whichSet][num1 - 1];
-		int x = thisPossPrevalence[whichSet][num2 - 1];
-		int y = thisPossPrevalence[whichSet][num3 - 1];
-		int z = thisPossPrevalence[whichSet][num4 - 1];
+			// For a Hidden Pair, all numbers must have a possPrevalence of 2
+			// For a Hidden Triple, all numbers must have a possPrevalence of 2-3
+			// For a Hidden Quad, all numbers must have a possPrevalence of 2-4
 
-		canWePass = false;
+			// Set thisPossPrevalence to the appropriate possPrevalence array,
+			// and for the current row/column/box retrieve the prevalance of
+			// each of the numbers. Continue if the relevant ones are acceptable.
+				
+			switch(fullHouseType)
+			{
+				case Row: thisPossPrevalence = mySudoku.rowPossPrevalence; break;
+				case Col: thisPossPrevalence = mySudoku.colPossPrevalence; break;
+				case Box: thisPossPrevalence = mySudoku.boxPossPrevalence; break;
+			}
 
-		switch(hiddenType)
-		{
-			case 2: if(inRange(w,2,2) && inRange(x,2,2)) canWePass = true; break;
-			case 3: if(inRange(w,2,3) && inRange(x,2,3) && inRange(y,2,3)) canWePass = true; break;
-			case 4: if(inRange(w,2,4) && inRange(x,2,4) && inRange(y,2,4) && inRange(z,2,4)) canWePass = true; break;
-		}
+			int w = thisPossPrevalence[whichHouse][num1 - 1];
+			int x = thisPossPrevalence[whichHouse][num2 - 1];
+			int y = thisPossPrevalence[whichHouse][num3 - 1];
+			int z = thisPossPrevalence[whichHouse][num4 - 1];
 
-		if(canWePass)
-		{
-			checkForHiddenSubset(mySudoku);
+			canWePass = false;
+
+			switch(hiddenType)
+			{
+				case 2: if(inRange(w,2,2) && inRange(x,2,2)) canWePass = true; break;
+				case 3: if(inRange(w,2,3) && inRange(x,2,3) && inRange(y,2,3)) canWePass = true; break;
+				case 4: if(inRange(w,2,4) && inRange(x,2,4) && inRange(y,2,4) && inRange(z,2,4)) canWePass = true; break;
+			}
+
+			if(canWePass)
+			{
+				checkForHiddenSubset();
+			}
 		}
 
 	} // checkPossPrevalence()
 
 
-	private void checkForHiddenSubset(FullSudoku mySudoku)
+	private void checkForHiddenSubset()
 	{
 		// Time to see whether we actually have a Hidden Subset
 
@@ -181,36 +210,131 @@ public class HiddenPairsTripsQuads
 
 		if(canWePass)
 		{
-			itIsElimination(mySudoku);
+			itIsElimination();
 		}
 
 	} // checkForHiddenSubset()
 
 
-	private void itIsElimination(FullSudoku mySudoku)
+	private void itIsElimination()
 	{
+		// Record of the Integers which are not part of the Hidden Subset
+
+		Integer[] numArray = new Integer[]{null,null,null,null,null,null,null};
+
+
+		boolean temp;
+
+		int numTrav = 0;
+		int squareTrav = 0;
+
 		// Elimination time. The two, three, or four squares we tested in the
 		// row/column/box lose every number except for the ones we tested.
 
-		for(int g=0;g<9;g++)
+		for(int h=1;h<10;h++)
 		{
-			if(totalSquaresIn[g] == true)
+			canWePass = false;
+
+			switch(hiddenType)
 			{
-				for(int h=1;h<10;h++)
+				case 2: if(h != num1 && h != num2) canWePass = true; break;
+				case 3: if(h != num1 && h != num2 && h != num3) canWePass = true; break;
+				case 4: if(h != num1 && h != num2 && h != num3 && h != num4) canWePass = true; break;
+			}
+
+			if(canWePass)
+			{
+				// Go through each square in the row/column/box
+
+				for(int g=0;g<9;g++)
 				{
-					switch(hiddenType)
+					// Act only if this square was found to be in the Hidden Subset
+
+					if(totalSquaresIn[g] == true)
 					{
-						case 2: if(h != num1 && h != num2) mySudoku.elimFromPossArray(singleRCB[g],h); break;
-						case 3: if(h != num1 && h != num2 && h != num3) mySudoku.elimFromPossArray(singleRCB[g],h); break;
-						case 4: if(h != num1 && h != num2 && h != num3 && h != num4) mySudoku.elimFromPossArray(singleRCB[g],h); break;
+						temp = mySudoku.elimFromPossArray(singleRCB[g],h);
+
+						if(temp)
+						{
+							if(!(didWeGetOne))
+							{
+								// Clear enough in myMethods to explain elimination of all but the 2, 3, or 4 poss
+
+								switch(fullHiddenType)
+								{
+									case Pair: myMethods.clearEnoughForNew(SolveMethod.HiddenPair); break;
+									case Trip: myMethods.clearEnoughForNew(SolveMethod.HiddenTriple); break;
+									case Quad: myMethods.clearEnoughForNew(SolveMethod.HiddenQuad); break;
+								}
+
+
+								// Put the other constants in place
+
+								myMethods.houseTargetType = fullHouseType;
+								myMethods.intTargetSet = whichHouse;
+								myMethods.subsetType = fullHiddenType;
+
+								didWeGetOne = true;
+							}
+
+							// Record square in squaresForKilledPoss, increment counter
+
+							myMethods.squaresForKilledPoss[numTrav][squareTrav] = g;
+							squareTrav++;
+						}
 					}
 				}
+
+				// Record the number in numArray, increment numTrav, reset squareTrav
+
+				// This happens outside of the segment which can be triggered only if
+				// this Naked Subset actually leads to elimination, so the last portion
+				// of this function will check whether it occurred and will transfer
+				// these numbers to arrayOfKilledPoss if needed.
+
+				numArray[numTrav] = h;
+				numTrav++;
+				squareTrav = 0;
 			}
 		}
 
-		// If we have accomplished something, activate continuousIntenseSolve()
+		// If at least one possibility was eliminated from at least one square,
+		// insert squares used and numbers not used into MethodExplanations
 
-		mySudoku.continuousIntenseSolve();
+		if(didWeGetOne)
+		{
+			// Send numbers making up the Hidden Subset
+
+			myMethods.miscNumsA[0] = num1;
+			myMethods.miscNumsA[1] = num2;
+			if(hiddenType >= 3) myMethods.miscNumsA[2] = num3;
+			if(hiddenType >= 4) myMethods.miscNumsA[3] = num4;
+
+
+			// Send squares used in the Hidden Subset
+
+			int findThem = 0;
+
+			for(int i=0;i<totalSquaresIn.length;i++)
+			{
+				if(totalSquaresIn[i])
+				{
+					myMethods.miscNumsB[findThem] = i;
+					findThem++;
+				}
+			}
+
+
+			// Send numbers not used, a.k.a. the possibilites which were nixed
+
+			myMethods.arrayOfKilledPoss[0] = numArray[0];
+			myMethods.arrayOfKilledPoss[1] = numArray[1];
+			myMethods.arrayOfKilledPoss[2] = numArray[2];
+			myMethods.arrayOfKilledPoss[3] = numArray[3];
+			myMethods.arrayOfKilledPoss[4] = numArray[4];
+			if(hiddenType <= 3) myMethods.arrayOfKilledPoss[5] = numArray[5];
+			if(hiddenType <= 2) myMethods.arrayOfKilledPoss[6] = numArray[6];
+		}
 
 	} // itIsElimination()
 
@@ -265,27 +389,25 @@ public class HiddenPairsTripsQuads
 
 	// Provides appropriate parameters to oneSubsetTypeOneRCB()
 
-	private void HiddenSubsetsRCB(FullSudoku mySudoku, int x)
+	private void HiddenSubsetsRCB(PTQ x)
 	{
 		// Every row/column/box is inserted along with an int noting which
 		// row/column/box it is, an int noting whether it is a row or column
 		// or box, and an int noting the type of Hidden Subset to be looked at.
 
-		// And the sudoku is inserted as well, of course.
-
 		for(int i=0;i<9;i++)
 		{
-			oneSubsetTypeOneRCB(mySudoku,mySudoku.provideRow(i),i,85,x);
+			oneSubsetTypeOneRCB(mySudoku.provideRow(i),HouseType.Row,i,x);
 		}
 
 		for(int j=0;j<9;j++)
 		{
-			oneSubsetTypeOneRCB(mySudoku,mySudoku.provideCol(j),j,86,x);
+			oneSubsetTypeOneRCB(mySudoku.provideCol(j),HouseType.Col,j,x);
 		}
 
 		for(int k=0;k<9;k++)
 		{
-			oneSubsetTypeOneRCB(mySudoku,mySudoku.provideBox(k),k,87,x);
+			oneSubsetTypeOneRCB(mySudoku.provideBox(k),HouseType.Box,k,x);
 		}
 
 	} // HiddenSubsetsRCB
@@ -294,23 +416,34 @@ public class HiddenPairsTripsQuads
 	// Public functions putting everything to use. Calls HiddenSubsetsRCB()
 	// with a 2 for Pairs, 3 for Triples, 4 for Quads
 
-	public void HiddenPairsRCB(FullSudoku mySudoku)
+	public boolean HiddenPairs()
 	{
-		HiddenSubsetsRCB(mySudoku,2);
+		didWeGetOne = false;
 
-	} // HiddenPairsRCB()
+		HiddenSubsetsRCB(PTQ.Pair);
 
-	public void HiddenTriplesRCB(FullSudoku mySudoku)
+		return didWeGetOne;
+
+	} // HiddenPairs()
+
+	public boolean HiddenTriples()
 	{
-		HiddenSubsetsRCB(mySudoku,3);
+		didWeGetOne = false;
 
-	} // HiddenTriplesRCB()
+		HiddenSubsetsRCB(PTQ.Trip);
 
-	public void HiddenQuadsRCB(FullSudoku mySudoku)
+		return didWeGetOne;
+
+	} // HiddenTriples()
+
+	public boolean HiddenQuads()
 	{
-		HiddenSubsetsRCB(mySudoku,4);
+		didWeGetOne = false;
 
-	} // HiddenQuadsRCB()
+		HiddenSubsetsRCB(PTQ.Quad);
 
+		return didWeGetOne;
+
+	} // HiddenQuads()
 
 } // HiddenPairsTripsQuads

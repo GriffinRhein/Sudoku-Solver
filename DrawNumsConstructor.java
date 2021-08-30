@@ -14,8 +14,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.InputEvent;
 
-import java.lang.StringBuilder;
-
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
@@ -62,15 +60,22 @@ public class DrawNumsConstructor extends PaintedObjects
 	ClickButton itsTheUndoSolveButton = new ClickButton();
 	ClickButton itsTheSaveSudokuButton = new ClickButton();
 	ClickButton itsTheLoadSudokuButton = new ClickButton();
+	ClickButton itsTheBeginStepsButton = new ClickButton();
+	ClickButton itsTheNextStepButton = new ClickButton();
+	ClickButton itsTheLastResortButton = new ClickButton();
 
 	String[][] stringCompForFinal = new String[9][9];
 
-	StringRetriever itsTheStringRetriever = new StringRetriever(this);
+	PopUpPane itsThePopUpPane = new PopUpPane(this);
+
+	JButtonCommands itsTheButtonCommands = new JButtonCommands(this);
 
 	FullSudoku ourSentSudoku;
 	SolveChecker ourSolveChecker;
 
-	SudokuSolveHumanMethods inputForSolving;
+	UsingLogicalMethods inputForSolving;
+
+	LastResort inputForLastResort;
 
 
 	// Create InputMap and ActionMap
@@ -102,6 +107,12 @@ public class DrawNumsConstructor extends PaintedObjects
 		public void actionPerformed(ActionEvent e)
 		{
 			fillInMap[currentRow][currentCol].setNum(numToHandle);
+
+			if(numToHandle != null)
+				fillInMap[currentRow][currentCol].changeStartEmpty(false);
+			else
+				fillInMap[currentRow][currentCol].changeStartEmpty(true);
+
 			fillInMap[currentRow][currentCol].repaint();
 		}
 	}
@@ -218,15 +229,45 @@ public class DrawNumsConstructor extends PaintedObjects
 	{
 		public void actionPerformed(ActionEvent e)
 		{
-			finalAct();
+			finalAct(true);
+		}
+	};
+
+	Action slowSolveStartAction = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			finalAct(false);
+		}
+	};
+
+	Action advanceStepAction = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			advanceOneStep();
+		}
+	};
+
+	Action lastResortAction = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			enactLastResort();
 		}
 	};
 
 
-	// Enact solving procedures & resulting visual adjustments
+	// Begin solving procedures
 
-	protected void finalAct()
+	protected void finalAct(boolean allAtOnce)
 	{
+		// Put all Strings input by the user into a 9x9 array
+
+		// getNum() returns an empty String of "" if no number
+		// was entered, so you can count on that being in all
+		// spots of stringCompForFinal thought of as empty
+
 		for(int i=0;i<ROWS;i++)
 		{
 			for(int j=0;j<COLS;j++)
@@ -236,287 +277,279 @@ public class DrawNumsConstructor extends PaintedObjects
 		}
 
 
-		// Create the FullSudoku and SolveChecker proper
+		// Create the SolveChecker, out of the numbers entered
 
-		ourSentSudoku = new FullSudoku(stringCompForFinal);
-		ourSolveChecker = new SolveChecker(ourSentSudoku);
+		ourSolveChecker = new SolveChecker(stringCompForFinal);
 
 
 		// Make sure the user has not inserted duplicates within a row/column/box
 
-		if(!(ourSolveChecker.isSudokuDupeFree()))
+		if(!(ourSolveChecker.isEntryDupeFree()))
 		{
-			itsTheStringRetriever.showInsertedDupeMessage();
+			itsThePopUpPane.showInsertedDupeMessage();
 		}
+
+		// Make sure the user has entered at least 17 numbers
+
+		else if(!(ourSolveChecker.areThereSeventeenClues()))
+		{
+			itsThePopUpPane.showNotEnoughCluesMessage();
+		}
+
+		// If so, advance
+
 		else
 		{
-			// The part where the numbers we inserted are sent to the
-			// Sudoku Solver, in which the solving occurs
+			// Create Sudoku
 
-			inputForSolving = new SudokuSolveHumanMethods(ourSentSudoku,ourSolveChecker);
+			ourSentSudoku = new FullSudoku(stringCompForFinal);
 
 
-			// On many occasions, the solving techniques assume that the puzzle has a
-			// proper solution, and puzzles with no solution will result in duplicates
-			// within a row/column/box. Duplicates will never occur in a puzzle which
-			// can be solved, so if there are duplicates here, there is no solution.
+			// Make sure the puzzle is solvable, before doing anything else
 
-			// There may be cases which are not yet caught, and this is likely where
-			// the last-resort solving methods will come in.
+			inputForLastResort = new LastResort(ourSentSudoku);
 
-			if(!(ourSolveChecker.isSudokuDupeFree()))
+			boolean didVirtualSolveSucceed = inputForLastResort.initiateCrudeVirtualSolve();
+
+			if(!(didVirtualSolveSucceed))
 			{
-				itsTheStringRetriever.showNoSolutionMessage();
+				itsThePopUpPane.showNoSolutionMessage();
 			}
+
+
 			else
 			{
-				// Solving procedures finished
-
-				for(int i=0;i<ROWS;i++)
-				{
-					for(int j=0;j<COLS;j++)
-					{
-						if(fillInMap[i][j].getNum().equals(""))
-							fillInMap[i][j].adjustSolve(true);
-
-						fillInMap[i][j].setNum( ourSentSudoku.SudokuMap[i][j].result );
-
-						fillInMap[i][j].setFinalPossArray( ourSentSudoku.SudokuMap[i][j].possArray );
-
-						fillInMap[i][j].repaint();
-					}
-				}
+				// Lock the controls for inputting numbers
 
 				if(controlsOn)
-				{
-					inputMap.clear();
-					actionMap.clear();
-					itsTheSolveButton.setEnabled(false);
-					itsTheUndoSolveButton.setEnabled(true);
-					itsTheLoadSudokuButton.setEnabled(false);
-
-					controlsOn = false;
-				}
+					turnControlsOff();
 
 				ourRectWidth = 0;
 				ourRectHeight = 0;
 
 				recToWorkWith.repaint();
 
-				textToWorkWith.setNumSquaresSolved(ourSentSudoku.squaresSolved);
-				textToWorkWith.repaint();
+
+				// The part where the numbers we inserted are sent to the
+				// Sudoku Solver, in which the logical solving will occur
+
+				inputForSolving = new UsingLogicalMethods(ourSentSudoku);
+
+				if(allAtOnce)
+					oneBigSolve();
+				else
+				{
+					updateCurrentStatus(0,true);
+					itsTheNextStepButton.setEnabled(true);
+				}
 			}
 		}
 	}
 
 
-	// Test command to reset solve text
+	// Update the GUI to show the current state of the Sudoku
+	// pointOfSolve: 0 for initial fill, 1 for logical solve, 2 for last resort
+
+	private void updateCurrentStatus(int pointOfSolve, boolean displayImmediately)
+	{
+		// Give the PaintedObjects the information
+
+		for(int i=0;i<ROWS;i++)
+		{
+			for(int j=0;j<COLS;j++)
+			{
+				if(fillInMap[i][j].getNum().equals(""))
+				{
+					if(ourSentSudoku.SudokuMap[i][j].result != null)
+					{
+						if(pointOfSolve == 1)
+							fillInMap[i][j].adjustHumanSolve(true);
+						else if(pointOfSolve == 2)
+							fillInMap[i][j].adjustLastResort(true);
+					}
+
+					fillInMap[i][j].setNum( ourSentSudoku.SudokuMap[i][j].result );
+					fillInMap[i][j].setPossArray( ourSentSudoku.SudokuMap[i][j].possArray );
+				}
+			}
+		}
+
+		textToWorkWith.setNumSquaresSolved(ourSentSudoku.squaresSolved);
+
+
+		if(displayImmediately)
+		{
+			// Display it
+
+			for(int i=0;i<ROWS;i++)
+			{
+				for(int j=0;j<COLS;j++)
+				{
+					fillInMap[i][j].repaint();
+				}
+			}
+
+			textToWorkWith.repaint();
+		}
+
+	} // updateCurrentStatus()
+
+
+	private void advanceOneStep()
+	{
+		boolean didWeDoSomething = inputForSolving.solveOneStep();
+
+		updateCurrentStatus(1,true);
+
+		if(ourSentSudoku.squaresSolved == 81)
+			itsTheNextStepButton.setEnabled(false);
+		else if(!(didWeDoSomething))
+		{
+			// IMPROVE IN FUTURE
+
+			System.out.println("No further logic techniques currently possible.");
+			itsTheNextStepButton.setEnabled(false);
+			itsTheLastResortButton.setEnabled(true);
+		}
+
+	} // advanceOneStep()
+
+
+	// Last Resort once logic techniques run out
+
+	private void enactLastResort()
+	{
+		// Should the user input a Sudoku with more than one solution, this check guarantees that the
+		// solution found by LastResort does not conflict with any work done by UsingLogicalMethods.
+		// Though, I'm not sure whether conflict is possible. UsingLogicalMethods works off certainty;
+		// I figure that it would never be able to make any moves down a branching path.
+
+		if(!(inputForLastResort.sameResults(ourSentSudoku)))
+		{
+			inputForLastResort = new LastResort(ourSentSudoku);
+			inputForLastResort.initiateCrudeVirtualSolve();
+		}
+
+
+		// Use LastResort's function to copy its results into the Sudoku squares
+
+		inputForLastResort.copyLastResortToSudoku(ourSentSudoku);
+
+
+		// Put everything in the GUI
+
+		updateCurrentStatus(2,true);
+
+
+		// Disable the Last Resort button, if it is on
+
+		itsTheLastResortButton.setEnabled(false);
+
+	} // enactLastResort()
+
+
+	// Solve all at once
+
+	private void oneBigSolve()
+	{
+		inputForSolving.solveAllAtOnce();
+
+		if(ourSentSudoku.squaresSolved == 81)
+			updateCurrentStatus(1,true);
+		else
+		{
+			updateCurrentStatus(1,false);
+			enactLastResort();
+		}
+
+	} // oneBigSolve()
+
+
+	// Turn user controls off
+
+	public void turnControlsOff()
+	{
+		inputMap.clear();
+		actionMap.clear();
+
+		itsTheSolveButton.setEnabled(false);
+		itsTheUndoSolveButton.setEnabled(true);
+		itsTheLoadSudokuButton.setEnabled(false);
+		itsTheBeginStepsButton.setEnabled(false);
+
+		controlsOn = false;
+	}
+
+
+	// Turn user controls on
+
+	public void turnControlsOn()
+	{
+		setDirecAction(pressRight,"rightAction",rightAction);
+		setDirecAction(pressLeft,"leftAction",leftAction);
+		setDirecAction(pressUp,"upAction",upAction);
+		setDirecAction(pressDown,"downAction",downAction);
+
+		setNumAction(pressOne,"oneAction",oneAction);
+		setNumAction(pressTwo,"twoAction",twoAction);
+		setNumAction(pressThree,"threeAction",threeAction);
+		setNumAction(pressFour,"fourAction",fourAction);
+		setNumAction(pressFive,"fiveAction",fiveAction);
+		setNumAction(pressSix,"sixAction",sixAction);
+		setNumAction(pressSeven,"sevenAction",sevenAction);
+		setNumAction(pressEight,"eightAction",eightAction);
+		setNumAction(pressNine,"nineAction",nineAction);
+		setNumAction(pressBack,"backAction",backAction);
+		setNumAction(pressDelete,"deleteAction",deleteAction);
+
+		setTheAction(pressEnter,"enterAction",enterAction);
+
+		itsTheSolveButton.setEnabled(true);
+		itsTheUndoSolveButton.setEnabled(false);
+		itsTheLoadSudokuButton.setEnabled(true);
+		itsTheBeginStepsButton.setEnabled(true);
+		itsTheNextStepButton.setEnabled(false);
+		itsTheLastResortButton.setEnabled(false);
+
+		controlsOn = true;
+	}
+
+
+
+	// Resets entire program to starting state
 
 	Action resetSudoku = new AbstractAction()
 	{
 		public void actionPerformed(ActionEvent e)
 		{
-			textToWorkWith.resetSolveText();
-			textToWorkWith.repaint();
-
-			for(int i=0;i<ROWS;i++)
-			{
-				for(int j=0;j<COLS;j++)
-				{
-					fillInMap[i][j].resetNumHolder();
-					fillInMap[i][j].repaint();
-				}
-			}
-
-			currentRow = 0;
-			currentCol = 0;
-
-			ourRecLocation.x = 100;
-			ourRecLocation.y = 100;
-
-			ourRectWidth = 60;
-			ourRectHeight = 60;
-
-			recToWorkWith.repaint();
-
-			if(!(controlsOn))
-			{
-				setDirecAction(pressRight,"rightAction",rightAction);
-				setDirecAction(pressLeft,"leftAction",leftAction);
-				setDirecAction(pressUp,"upAction",upAction);
-				setDirecAction(pressDown,"downAction",downAction);
-
-				setNumAction(pressOne,"oneAction",oneAction);
-				setNumAction(pressTwo,"twoAction",twoAction);
-				setNumAction(pressThree,"threeAction",threeAction);
-				setNumAction(pressFour,"fourAction",fourAction);
-				setNumAction(pressFive,"fiveAction",fiveAction);
-				setNumAction(pressSix,"sixAction",sixAction);
-				setNumAction(pressSeven,"sevenAction",sevenAction);
-				setNumAction(pressEight,"eightAction",eightAction);
-				setNumAction(pressNine,"nineAction",nineAction);
-				setNumAction(pressBack,"backAction",backAction);
-				setNumAction(pressDelete,"deleteAction",deleteAction);
-
-				setTheAction(pressEnter,"enterAction",enterAction);
-
-				itsTheSolveButton.setEnabled(true);
-				itsTheUndoSolveButton.setEnabled(false);
-				itsTheLoadSudokuButton.setEnabled(true);
-
-				controlsOn = true;
-			}
+			itsTheButtonCommands.resetEverything();
 		}
 	};
 
-	// Does not reset everything, but will undo a solve
+	// Reverts puzzle to what the user input
 
 	Action undoTheSolve = new AbstractAction()
 	{
 		public void actionPerformed(ActionEvent e)
 		{
-			textToWorkWith.resetSolveText();
-			textToWorkWith.repaint();
-
-			for(int i=0;i<ROWS;i++)
-			{
-				for(int j=0;j<COLS;j++)
-				{
-					if(stringCompForFinal[i][j] == "")
-					{
-						fillInMap[i][j].resetNumHolder();
-						fillInMap[i][j].repaint();
-					}
-				}
-			}
-
-			ourRectWidth = 60;
-			ourRectHeight = 60;
-
-			recToWorkWith.repaint();
-
-			if(!(controlsOn))
-			{
-				setDirecAction(pressRight,"rightAction",rightAction);
-				setDirecAction(pressLeft,"leftAction",leftAction);
-				setDirecAction(pressUp,"upAction",upAction);
-				setDirecAction(pressDown,"downAction",downAction);
-
-				setNumAction(pressOne,"oneAction",oneAction);
-				setNumAction(pressTwo,"twoAction",twoAction);
-				setNumAction(pressThree,"threeAction",threeAction);
-				setNumAction(pressFour,"fourAction",fourAction);
-				setNumAction(pressFive,"fiveAction",fiveAction);
-				setNumAction(pressSix,"sixAction",sixAction);
-				setNumAction(pressSeven,"sevenAction",sevenAction);
-				setNumAction(pressEight,"eightAction",eightAction);
-				setNumAction(pressNine,"nineAction",nineAction);
-				setNumAction(pressBack,"backAction",backAction);
-				setNumAction(pressDelete,"deleteAction",deleteAction);
-
-				setTheAction(pressEnter,"enterAction",enterAction);
-
-				itsTheSolveButton.setEnabled(true);
-				itsTheUndoSolveButton.setEnabled(false);
-				itsTheLoadSudokuButton.setEnabled(true);
-
-				controlsOn = true;
-			}
+			itsTheButtonCommands.revertToUserInput();
 		}
 	};
-
-
-	public boolean isOrWasSquareEmpty(OurNumHolder theSquare)
-	{
-		// If the controls are on, the puzzle has not been solved yet.
-
-		if(controlsOn)
-		{
-			// In this case, just check whether the square is empty.
-
-			if(theSquare.getNum().equals(""))
-				return true;
-			else
-				return false;
-		}
-
-		// If the controls are off, the puzzle must have been solved.
-
-		// Each NumHolder has a built-in boolean to keep track of
-		// whether it was filled in only when the user hit "Solve"
-
-		return theSquare.getSolveAddStatus();
-	}
-
 
 	// Save Sudoku
 
 	Action saveTheSudoku = new AbstractAction()
 	{
-		StringBuilder builtString;
-		int blankCounter;
-		OurNumHolder currentSquare;
-		int success;
-
-		String outputString;
+		String savedAs;
 
 		public void actionPerformed(ActionEvent e)
 		{
-			builtString = new StringBuilder();
-			blankCounter = 0;
-
-			// Go through each square in the 9x9 grid
-
-			for(int y=0;y<9;y++)
-			{
-				for(int x=0;x<9;x++)
-				{
-					currentSquare = fillInMap[y][x];
-
-					// Check whether the square was filled in by the user
-
-					if(!(isOrWasSquareEmpty(currentSquare)))
-					{
-						// If the user entered a number, then append a letter
-						// indicating how many blanks there were preceding it.
-						// And reset the counter.
-
-						if(blankCounter != 0)
-						{
-							builtString.append((char)(blankCounter+96));
-							blankCounter = 0;
-						}
-
-						// Append the number
-
-						builtString.append(currentSquare.getNum());
-					}
-					else
-					{
-						// If the user did not enter any number, then the square is blank.
-						// Increment blankCounter.
-
-						blankCounter++;
-
-						// But make sure you get the final letter down if you've reached the end,
-						// or throw down a "z" & reset if you've somehow gotten 26 blanks in a row
-
-						if((y == 8 && x == 8) || blankCounter >= 26)
-						{
-							builtString.append((char)(blankCounter+96));
-							blankCounter = 0;
-						}
-					}
-				}
-			}
-
-			outputString = builtString.toString();
+			savedAs = itsTheButtonCommands.savingSudoku();
 
 
-			// Output the String.
+			// Give user the String
 
-			itsTheStringRetriever.outputTheString(outputString);
-
+			itsThePopUpPane.outputTheString(savedAs);
 		}
 	};
 
@@ -524,168 +557,28 @@ public class DrawNumsConstructor extends PaintedObjects
 
 	Action loadTheSudoku = new AbstractAction()
 	{
-		String testString;
-
-		char[] charArray;
-
-		Integer[][] sudokuToLoad;
-
-		boolean doWeBotherLoad;
-		boolean tooFew;
-		boolean tooMany;
-
-		int loadY;
-		int loadX;
-		int loadCounter;
-
-		int nowASCII;
+		String savedAs;
+		int wasThereError;
 
 		public void actionPerformed(ActionEvent e)
 		{
-			testString = itsTheStringRetriever.getString();
+			savedAs = itsThePopUpPane.getString();
 
-			// testString will be null if the user hit Cancel.
-			// In that case, don't do anything.
 
-			if(testString != null)
-			{
-				charArray = testString.toCharArray();
+			// Implement String into puzzle
 
-				sudokuToLoad = new Integer[9][9];
+			wasThereError = itsTheButtonCommands.loadingSudoku(savedAs);
 
-				doWeBotherLoad = true;
-				tooFew = false;
-				tooMany = false;
-
-				loadY = 0;
-				loadX = 0;
-				loadCounter = 0;
-
-				// Make sure there are no invalid characters in the String
-
-				for(int a=0;a<charArray.length;a++)
-				{
-					nowASCII = (int)charArray[a];
-
-					if(nowASCII < 49 || (nowASCII > 57 && nowASCII < 97) || nowASCII > 122)
-					{
-						doWeBotherLoad = false;
-					}
-				}
-
-				// If there was an invalid character, display error message. Otherwise, continue.
-
-				if(!(doWeBotherLoad))
-				{
-					itsTheStringRetriever.showErrorMessage(0);
-				}
-				else
-				{
-					// At this point, we know every character is a number or lowercase letter.
-
-					for(int a=0;a<charArray.length;a++)
-					{
-						if(!(tooMany))
-						{
-							nowASCII = (int)charArray[a];
-
-							// Letter if >96, Number if not.
-
-							if(nowASCII > 96)
-							{
-								loadCounter = nowASCII - 96;
-
-								while(loadCounter > 0)
-								{
-									if(loadY > 8)
-									{
-										tooMany = true;
-									}
-									else
-									{
-										sudokuToLoad[loadY][loadX] = null;
-									}
-
-									if(loadX != 8)
-									{
-										loadX++;
-									}
-									else
-									{
-										loadX = 0;
-										loadY++;
-									}
-
-									loadCounter--;
-								}
-							}
-							else
-							{
-								if(loadY > 8)
-								{
-									tooMany = true;
-								}
-								else
-								{
-									sudokuToLoad[loadY][loadX] = Character.getNumericValue(charArray[a]);
-								}
-
-								if(loadX != 8)
-								{
-									loadX++;
-								}
-								else
-								{
-									loadX = 0;
-									loadY++;
-								}
-
-							}
-						}
-
-					}
-
-					if(loadY < 9)
-					{
-						tooFew = true;
-					}
-
-					// If there are too many or too few, display the appropriate error message
-					// Otherwise, give fillInMap everything
-
-					if(tooFew)
-					{
-						itsTheStringRetriever.showErrorMessage(1);
-					}
-					else if(tooMany)
-					{
-						itsTheStringRetriever.showErrorMessage(2);
-					}
-					else
-					{
-						for(int s=0;s<9;s++)
-						{
-							for(int t=0;t<9;t++)
-							{
-								fillInMap[s][t].setNum(sudokuToLoad[s][t]);
-								fillInMap[s][t].repaint();
-							}
-						}
-					}
-				}
-			}
+			if(wasThereError != 0)
+				itsThePopUpPane.showErrorMessage(wasThereError);
 		}
 	};
-
-
-
 
 
 	// Constructor!!!
 
 	public DrawNumsConstructor()
 	{
-
 		// At the start, all we have is an array of empty
 		// spots, each designated for an OurNumHolder, so
 		// we need to actually fill it up with the things
@@ -698,7 +591,7 @@ public class DrawNumsConstructor extends PaintedObjects
 			}
 		}
 
-
+// ~~~~~~~~~~~~~~~~~~~~
 
 		// Now, the Rectangle, the CoreGrid, and every NumHolder
 		// is placed into a series of parent/child relationships
@@ -781,7 +674,7 @@ public class DrawNumsConstructor extends PaintedObjects
 
 		textToWorkWith.add(itsTheSolveButton);
 		itsTheSolveButton.setAction(enterAction);
-		itsTheSolveButton.setBounds(280,700,180,25);
+		itsTheSolveButton.setBounds(280,690,180,45);
 		itsTheSolveButton.setText("Solve Sudoku");
 		itsTheSolveButton.setFocusPainted(false);
 
@@ -792,7 +685,6 @@ public class DrawNumsConstructor extends PaintedObjects
 		itsTheUndoSolveButton.setBounds(490,700,120,25);
 		itsTheUndoSolveButton.setText("Undo Solve");
 		itsTheUndoSolveButton.setFocusPainted(false);
-		itsTheUndoSolveButton.setEnabled(false);
 
 		// Save Sudoku Button
 
@@ -801,7 +693,6 @@ public class DrawNumsConstructor extends PaintedObjects
 		itsTheSaveSudokuButton.setBounds(670,280,180,60);
 		itsTheSaveSudokuButton.setText("Save Sudoku");
 		itsTheSaveSudokuButton.setFocusPainted(false);
-		itsTheSaveSudokuButton.setEnabled(true);
 
 
 		// Load Sudoku Button
@@ -811,7 +702,40 @@ public class DrawNumsConstructor extends PaintedObjects
 		itsTheLoadSudokuButton.setBounds(670,400,180,60);
 		itsTheLoadSudokuButton.setText("Load Sudoku");
 		itsTheLoadSudokuButton.setFocusPainted(false);
-		itsTheLoadSudokuButton.setEnabled(true);
+
+
+		// Begin Steps Button
+
+		textToWorkWith.add(itsTheBeginStepsButton);
+		itsTheBeginStepsButton.setAction(slowSolveStartAction);
+		itsTheBeginStepsButton.setBounds(700,625,150,20);
+		itsTheBeginStepsButton.setText("Begin Slow Solve");
+		itsTheBeginStepsButton.setFocusPainted(false);
+
+
+		// Next Step Button
+
+		textToWorkWith.add(itsTheNextStepButton);
+		itsTheNextStepButton.setAction(advanceStepAction);
+		itsTheNextStepButton.setBounds(700,665,150,20);
+		itsTheNextStepButton.setText("Next Step");
+		itsTheNextStepButton.setFocusPainted(false);
+
+
+		// Last Resort Button
+
+		textToWorkWith.add(itsTheLastResortButton);
+		itsTheLastResortButton.setAction(lastResortAction);
+		itsTheLastResortButton.setBounds(700,705,150,20);
+		itsTheLastResortButton.setText("Last Resort");
+		itsTheLastResortButton.setFocusPainted(false);
+
+
+		// Ensure user control is allowed at start
+
+		turnControlsOn();
+		itsTheResetButton.setEnabled(true);
+		itsTheSaveSudokuButton.setEnabled(true);
 
 
 		// This just makes it so that hitting spacebar doesn't click the button
@@ -830,27 +754,6 @@ public class DrawNumsConstructor extends PaintedObjects
 		add(recToWorkWith);
 
 // ~~~~~~~~~~~~~~~~~~~~
-
-		// Set up the commands for moving around and entering numbers
-
-		setDirecAction(pressRight,"rightAction",rightAction);
-		setDirecAction(pressLeft,"leftAction",leftAction);
-		setDirecAction(pressUp,"upAction",upAction);
-		setDirecAction(pressDown,"downAction",downAction);
-
-		setNumAction(pressOne,"oneAction",oneAction);
-		setNumAction(pressTwo,"twoAction",twoAction);
-		setNumAction(pressThree,"threeAction",threeAction);
-		setNumAction(pressFour,"fourAction",fourAction);
-		setNumAction(pressFive,"fiveAction",fiveAction);
-		setNumAction(pressSix,"sixAction",sixAction);
-		setNumAction(pressSeven,"sevenAction",sevenAction);
-		setNumAction(pressEight,"eightAction",eightAction);
-		setNumAction(pressNine,"nineAction",nineAction);
-		setNumAction(pressBack,"backAction",backAction);
-		setNumAction(pressDelete,"deleteAction",deleteAction);
-
-		setTheAction(pressEnter,"enterAction",enterAction);
 
 		// Last bit of JFrame setup
 

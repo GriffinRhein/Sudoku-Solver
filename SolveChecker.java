@@ -1,39 +1,37 @@
 public class SolveChecker
 {
-	private FullSudoku mySudoku;
-	private int numRowCol;
+	private String[][] stringArray;
 
-	public SolveChecker(FullSudoku a)
+	public SolveChecker(String[][] b)
 	{
-		mySudoku = a;
-		numRowCol = mySudoku.numRowCol;
+		stringArray = b;
 	}
 
 
-	public boolean isSudokuDupeFree()
+	public boolean isEntryDupeFree()
 	{
 		boolean areWeDupeFree = true;
 		int currentRCB = 0; 
 
-		while(areWeDupeFree && currentRCB < numRowCol)
+		while(areWeDupeFree && currentRCB < 9)
 		{
-			areWeDupeFree = checkOneRCB(mySudoku.provideRow(currentRCB));
+			areWeDupeFree = checkOneRCB(provideStringRow(currentRCB));
 			currentRCB++;
 		}
 
 		currentRCB = 0;
 
-		while(areWeDupeFree && currentRCB < numRowCol)
+		while(areWeDupeFree && currentRCB < 9)
 		{
-			areWeDupeFree = checkOneRCB(mySudoku.provideCol(currentRCB));
+			areWeDupeFree = checkOneRCB(provideStringCol(currentRCB));
 			currentRCB++;
 		}
 
 		currentRCB = 0;
 
-		while(areWeDupeFree && currentRCB < numRowCol)
+		while(areWeDupeFree && currentRCB < 9)
 		{
-			areWeDupeFree = checkOneRCB(mySudoku.provideBox(currentRCB));
+			areWeDupeFree = checkOneRCB(provideStringBox(currentRCB));
 			currentRCB++;
 		}
 
@@ -42,13 +40,13 @@ public class SolveChecker
 	} // isSudokuDupeFree()
 
 
-	private boolean checkOneRCB(Square[] theRCB)
+	private boolean checkOneRCB(String[] theRCB)
 	{
 		// Create array of booleans, and fill it with false
 
-		boolean[] allPoss = new boolean[numRowCol];
+		boolean[] allPoss = new boolean[9];
 
-		for(int a=0;a<numRowCol;a++)
+		for(int a=0;a<9;a++)
 		{
 			allPoss[a] = false;
 		}
@@ -60,16 +58,17 @@ public class SolveChecker
 		// set its corresponding boolean in allPoss to true. If the result has
 		// appeared before, areWeDupeFree is false.
 
-		for(int a=0;a<numRowCol;a++)
+		for(int a=0;a<9;a++)
 		{
-			currentResult = theRCB[a].result;
-
-			if(currentResult != null)
+			if(theRCB[a] != "")
 			{
+				currentResult = Integer.valueOf(theRCB[a]);
+
 				if(allPoss[currentResult - 1] == false)
 				{
 					allPoss[currentResult - 1] = true;
 				}
+
 				else
 				{
 					return false;
@@ -80,5 +79,76 @@ public class SolveChecker
 		return true;
 
 	} // checkForDupesOneRCB()
+
+
+	public boolean areThereSeventeenClues()
+	{
+		int myCounter = 0;
+
+		for(int a=0;a<9;a++)
+		{
+			for(int b=0;b<9;b++)
+			{
+				if(stringArray[a][b] != "")
+					myCounter++;
+			}
+		}
+
+		if(myCounter < 17)
+			return false;
+
+		return true;
+
+	} // areThereSeventeenClues()
+
+
+	// Provide a row of Strings
+
+	private String[] provideStringRow(int rowNum)
+	{
+		String[] rowProvided = new String[9];
+
+		for(int i=0;i<9;i++)
+		{
+			rowProvided[i] = stringArray[rowNum][i];
+		}
+
+		return rowProvided;
+	}
+
+	// Provide a column of Strings
+
+	private String[] provideStringCol(int colNum)
+	{
+		String[] colProvided = new String[9];
+
+		for(int i=0;i<9;i++)
+		{
+			colProvided[i] = stringArray[i][colNum];
+		}
+
+		return colProvided;
+	}
+
+	// Provide a box of Strings
+
+	private String[] provideStringBox(int boxNum)
+	{
+		String[] boxProvided = new String[9];
+
+		BoxTranslator myUnboxer = new BoxTranslator();
+		int goodRow;
+		int goodCol;
+
+		for(int i=0;i<9;i++)
+		{
+			goodRow = myUnboxer.rowOfBoxSquare(boxNum,i);
+			goodCol = myUnboxer.colOfBoxSquare(boxNum,i);
+
+			boxProvided[i] = stringArray[goodRow][goodCol];
+		}
+
+		return boxProvided;
+	}
 
 } // SolveChecker class

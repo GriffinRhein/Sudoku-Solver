@@ -1,32 +1,66 @@
 public class NakedPairsTripsQuads
 {
+	private FullSudoku mySudoku;
+	private MethodExplanations myMethods;
+
+	public NakedPairsTripsQuads(FullSudoku theSudoku, MethodExplanations theMethods)
+	{
+		mySudoku = theSudoku;
+		myMethods = theMethods;
+	}
+
 	// Handy boolean
 
-	boolean canWePass;
+	private boolean canWePass;
 
 	// Array of 9 Squares which make up the row/column/box being looked at
 
-	Square[] singleRCB;
+	private Square[] singleRCB;
+
+	// Type of set currently being looked at: Row, Column, or Box
+
+	private HouseType fullHouseType;
+
+	// Which set is being looked at: Integer in range 0-8
+
+	private int whichHouse;
+
+	// Type of Naked Subset being sought: Pair, Trip, or Quad
+
+	private PTQ fullNakedType;
 
 	// int for the type of Naked Subset being sought. 2 for Pairs, 3 for Triples, 4 for Quads
 
-	int nakedType;
+	private int nakedType;
 
 	// int for Squares being examined
 
-	int square1;
-	int square2;
-	int square3;
-	int square4;
+	private int square1;
+	private int square2;
+	private int square3;
+	private int square4;
+
+	// Whether a Naked Pair/Trip/Quad has been successfully utilized
+
+	private boolean didWeGetOne;
 
 
 	// This function is used for Naked Pairs, Naked Triples, and Naked Quads.
 	// (Functions which call this one are at the bottom of this document)
 
-	private void oneSubsetTypeOneRCB(FullSudoku mySudoku, Square[] inputRCB, int whichNaked)
+	private void oneSubsetTypeOneRCB(Square[] inputRCB, HouseType woo, int whichSet, PTQ hoo)
 	{
 		singleRCB = inputRCB;
-		nakedType = whichNaked;
+		fullHouseType = woo;
+		whichHouse = whichSet;
+		fullNakedType = hoo;
+
+		switch(fullNakedType)
+		{
+			case Pair: nakedType = 2; break;
+			case Trip: nakedType = 3; break;
+			case Quad: nakedType = 4; break;
+		}
 
 		// For a Naked Pair, all combinations of two different squares from 0 through 8 must be checked
 		// For a Naked Triple, all combinations of three different squares from 0 through 8 must be checked
@@ -68,7 +102,7 @@ public class NakedPairsTripsQuads
 
 						if(canWePass)
 						{
-							checkNumPossLeft(mySudoku);
+							checkNumPossLeft();
 						}
 
 					}
@@ -79,35 +113,40 @@ public class NakedPairsTripsQuads
 	} // oneSubsetTypeOneRCB()
 
 
-	private void checkNumPossLeft(FullSudoku mySudoku)
+	private void checkNumPossLeft()
 	{
-		// For a Naked Pair, all squares must have a numPossLeft of 2
-		// For a Naked Triple, all squares must have a numPossLeft of 2-3
-		// For a Naked Quad, all squares must have a numPossLeft of 2-4
+		// Continue if we haven't already found a Naked Pair/Trip/Quad
 
-		int w = singleRCB[square1].numPossLeft;
-		int x = singleRCB[square2].numPossLeft;
-		int y = singleRCB[square3].numPossLeft;
-		int z = singleRCB[square4].numPossLeft;
-
-		canWePass = false;
-
-		switch(nakedType)
+		if(!(didWeGetOne))
 		{
-			case 2: if(inRange(w,2,2) && inRange(x,2,2)) canWePass = true; break;
-			case 3: if(inRange(w,2,3) && inRange(x,2,3) && inRange(y,2,3)) canWePass = true; break;
-			case 4: if(inRange(w,2,4) && inRange(x,2,4) && inRange(y,2,4) && inRange(z,2,4)) canWePass = true; break;
-		}
+			// For a Naked Pair, all squares must have a numPossLeft of 2
+			// For a Naked Triple, all squares must have a numPossLeft of 2-3
+			// For a Naked Quad, all squares must have a numPossLeft of 2-4
 
-		if(canWePass)
-		{
-			checkForNakedSubset(mySudoku);
+			int w = singleRCB[square1].numPossLeft;
+			int x = singleRCB[square2].numPossLeft;
+			int y = singleRCB[square3].numPossLeft;
+			int z = singleRCB[square4].numPossLeft;
+
+			canWePass = false;
+
+			switch(nakedType)
+			{
+				case 2: if(inRange(w,2,2) && inRange(x,2,2)) canWePass = true; break;
+				case 3: if(inRange(w,2,3) && inRange(x,2,3) && inRange(y,2,3)) canWePass = true; break;
+				case 4: if(inRange(w,2,4) && inRange(x,2,4) && inRange(y,2,4) && inRange(z,2,4)) canWePass = true; break;
+			}
+
+			if(canWePass)
+			{
+				checkForNakedSubset();
+			}
 		}
 
 	} // checkNumPossLeft()
 
 
-	private void checkForNakedSubset(FullSudoku mySudoku)
+	private void checkForNakedSubset()
 	{
 		// Time to see whether we actually have a Naked Subset
 
@@ -150,14 +189,24 @@ public class NakedPairsTripsQuads
 
 		if(canWePass)
 		{
-			elimTime(mySudoku);
+			elimTime();
 		}
 
 	} // checkForNakedSubset()
 
 
-	private void elimTime(FullSudoku mySudoku)
+	private void elimTime()
 	{
+		// Record of the Integers which are part of the Naked Subset
+
+		Integer[] numArray = new Integer[]{null,null,null,null};
+
+
+		boolean temp;
+
+		int numTrav = 0;
+		int squareTrav = 0;
+
 		// Elimination time. The two, three, or four numbers forming the Naked Subset are
 		// booted from every square in the row/column/box except for the ones we tested.
 
@@ -187,15 +236,68 @@ public class NakedPairsTripsQuads
 
 					if(canWePass)
 					{
-						mySudoku.elimFromPossArray(singleRCB[g],f);
+						temp = mySudoku.elimFromPossArray(singleRCB[g],f);
+
+						if(temp)
+						{
+							// For stuff which needs to happen only once when a Naked Subset is found
+
+							if(!(didWeGetOne))
+							{
+								// Clear enough in myMethods to explain elimination of the 2, 3, or 4 poss
+
+								switch(fullNakedType)
+								{
+									case Pair: myMethods.clearEnoughForNew(SolveMethod.NakedPair); break;
+									case Trip: myMethods.clearEnoughForNew(SolveMethod.NakedTriple); break;
+									case Quad: myMethods.clearEnoughForNew(SolveMethod.NakedQuad); break;
+								}
+
+								// Put the other constants in place
+
+								myMethods.houseTargetType = fullHouseType;
+								myMethods.intTargetSet = whichHouse;
+								myMethods.subsetType = fullNakedType;
+
+								myMethods.miscNumsA[0] = square1;
+								myMethods.miscNumsA[1] = square2;
+								if(nakedType >= 3) myMethods.miscNumsA[2] = square3;
+								if(nakedType >= 4) myMethods.miscNumsA[3] = square4;
+
+								didWeGetOne = true;
+							}
+
+							// Record square in squaresForKilledPoss, increment counter
+
+							myMethods.squaresForKilledPoss[numTrav][squareTrav] = g;
+							squareTrav++;
+						}
 					}
 				}
+
+				// Record the number in numArray, increment numTrav, reset squareTrav
+
+				// This happens outside of the segment which can be triggered only if
+				// this Naked Subset actually leads to elimination, so the last portion
+				// of this function will check whether it occurred and will transfer
+				// these numbers to arrayOfKilledPoss if needed.
+
+				numArray[numTrav] = f;
+				numTrav++;
+				squareTrav = 0;
 			}
 		}
 
-		// If we have accomplished something, activate continuousIntenseSolve()
+		// If at least one possibility was eliminated from at least one square,
+		// insert numbers used for the Naked Subset into MethodExplanations
 
-		mySudoku.continuousIntenseSolve();
+		if(didWeGetOne)
+		{
+			myMethods.arrayOfKilledPoss[0] = numArray[0];
+			myMethods.arrayOfKilledPoss[1] = numArray[1];
+			if(nakedType >= 3) myMethods.arrayOfKilledPoss[2] = numArray[2];
+			if(nakedType >= 4) myMethods.arrayOfKilledPoss[3] = numArray[3];
+		}
 
 	} // elimTime()
 
@@ -244,26 +346,24 @@ public class NakedPairsTripsQuads
 
 	// Provides appropriate parameters to oneSubsetTypeOneRCB()
 
-	private void NakedSubsetsRCB(FullSudoku mySudoku, int x)
+	private void NakedSubsetsRCB(PTQ x)
 	{
 		// Every row/column/box is inserted along with an int
-		// noting the type of Hidden Subset to be looked at.
-
-		// And the sudoku is inserted as well, of course.
+		// noting the type of Naked Subset to be looked at.
 
 		for(int i=0;i<9;i++)
 		{
-			oneSubsetTypeOneRCB(mySudoku,mySudoku.provideRow(i),x);
+			oneSubsetTypeOneRCB(mySudoku.provideRow(i),HouseType.Row,i,x);
 		}
 
 		for(int j=0;j<9;j++)
 		{
-			oneSubsetTypeOneRCB(mySudoku,mySudoku.provideCol(j),x);
+			oneSubsetTypeOneRCB(mySudoku.provideCol(j),HouseType.Col,j,x);
 		}
 
 		for(int k=0;k<9;k++)
 		{
-			oneSubsetTypeOneRCB(mySudoku,mySudoku.provideBox(k),x);
+			oneSubsetTypeOneRCB(mySudoku.provideBox(k),HouseType.Box,k,x);
 		}
 
 	} // NakedSubsetsRCB
@@ -272,23 +372,34 @@ public class NakedPairsTripsQuads
 	// Public functions putting everything to use. Calls NakedSubsetsRCB()
 	// with a 2 for Pairs, 3 for Triples, 4 for Quads
 
-	public void NakedPairsRCB(FullSudoku mySudoku)
+	public boolean NakedPairs()
 	{
-		NakedSubsetsRCB(mySudoku,2);
+		didWeGetOne = false;
 
-	} // NakedPairsRCB()
+		NakedSubsetsRCB(PTQ.Pair);
 
-	public void NakedTriplesRCB(FullSudoku mySudoku)
+		return didWeGetOne;
+
+	} // NakedPairs()
+
+	public boolean NakedTriples()
 	{
-		NakedSubsetsRCB(mySudoku,3);
+		didWeGetOne = false;
 
-	} // NakedTriplesRCB()
+		NakedSubsetsRCB(PTQ.Trip);
 
-	public void NakedQuadsRCB(FullSudoku mySudoku)
+		return didWeGetOne;
+
+	} // NakedTriples()
+
+	public boolean NakedQuads()
 	{
-		NakedSubsetsRCB(mySudoku,4);
+		didWeGetOne = false;
 
-	} // NakedQuadsRCB()
+		NakedSubsetsRCB(PTQ.Quad);
 
+		return didWeGetOne;
+
+	} // NakedQuads()
 
 } // NakedPairsTripsQuads

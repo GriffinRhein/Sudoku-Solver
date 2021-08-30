@@ -199,49 +199,30 @@ public class PaintedObjects extends JFrame
 	public class SolveText
 	{
 		protected Integer numSquaresSolved = null;
-		private String fullSquaresSolvedQuote = "";
 
-		private String completionMessage = "";
+		private String incompleteString = "";
+		private String completeString = "Puzzle is complete!";
 
-		protected int BottomPracY = (640+(640+60))/2 - smallerFM.getHeight()/2 + smallerFM.getAscent();
-		protected int BottomPracX;
-
-		protected int TopPracY = (100+(100-60))/2 - smallerFM.getHeight()/2 + smallerFM.getAscent();
-		protected int TopPracX;
+		private String shownMessage = incompleteString;
+		private int shownMessY = (100+(100-60))/2 - smallerFM.getHeight()/2 + smallerFM.getAscent();
+		private int shownMessX;
 
 		protected void resetThisAll()
 		{
 			numSquaresSolved = null;
-			fullSquaresSolvedQuote = "";
-			completionMessage = "";
+			shownMessage = incompleteString;
 		}
 
 		protected void paint(Graphics2D g2d)
 		{
-			g2d.setColor(thePurple);
+			g2d.setColor(theBlue);
 			g2d.setFont(smallerFont);
 
-			if(numSquaresSolved != null)
-			{
-				fullSquaresSolvedQuote = "Squares Solved: "+String.valueOf(numSquaresSolved);
+			if(numSquaresSolved != null && numSquaresSolved.equals(81))
+					shownMessage = completeString;
 
-				if(numSquaresSolved.equals(81))
-					g2d.setColor(theBlue);
-			}
-
-			BottomPracX = (100+(100+540))/2 - smallerFM.stringWidth(fullSquaresSolvedQuote)/2;
-			g2d.drawString(fullSquaresSolvedQuote,BottomPracX,BottomPracY);
-
-			if(numSquaresSolved != null)
-			{
-				if(numSquaresSolved.equals(81))
-					completionMessage = "Puzzle is complete!";
-				else
-					completionMessage = "Puzzle is NOT complete.";
-			}
-				
-			TopPracX = (100+(100+540))/2 - smallerFM.stringWidth(completionMessage)/2;
-			g2d.drawString(completionMessage,TopPracX,TopPracY);
+			shownMessX = (100+(100+540))/2 - smallerFM.stringWidth(shownMessage)/2;
+			g2d.drawString(shownMessage,shownMessX,shownMessY);
 		}
 
 	} // SolveText class
@@ -300,7 +281,10 @@ public class PaintedObjects extends JFrame
 		protected int possArrayPracY;
 		protected int possArrayPracX;
 
-		protected boolean beingAddedOnSolve = false;
+		protected boolean addedOnHumanSolve = false;
+		protected boolean addedOnLastResort = false;
+
+		protected boolean didSquareStartEmpty = true;
 
 		protected int[] howFarY = new int[]{0,0,0,20,20,20,40,40,40};
 		protected int[] howFarX = new int[]{0,20,40,0,20,40,0,20,40};
@@ -335,7 +319,9 @@ public class PaintedObjects extends JFrame
 			{
 				endPossArray[s] = "";
 			}
-			beingAddedOnSolve = false;
+			addedOnHumanSolve = false;
+			addedOnLastResort = false;
+			didSquareStartEmpty = true;
 		}
 
 		protected void paint(Graphics2D g2d)
@@ -343,7 +329,7 @@ public class PaintedObjects extends JFrame
 			// Set the color and font, then use own variables to
 			// paint the correct number at the correct location
 
-			if(beingAddedOnSolve && numHeld.equals(""))
+			if(numHeld.equals(""))
 			{
 				g2d.setColor(thePurple);
 
@@ -359,7 +345,18 @@ public class PaintedObjects extends JFrame
 				}
 			}
 
-			else if(beingAddedOnSolve)
+			else if(addedOnLastResort)
+			{
+				g2d.setColor(theRed);
+
+				g2d.setFont(myFont);
+
+				pracX = (100+(100+60))/2 - fm.stringWidth(numHeld)/2;
+				g2d.drawString(numHeld,pracX+ownCol*60,pracY+ownRow*60);
+			}
+
+
+			else if(addedOnHumanSolve)
 			{
 				g2d.setColor(theBlue);
 
@@ -399,9 +396,23 @@ public class PaintedObjects extends JFrame
 		protected void setNum(Integer v)
 		{
 			if( v != null )
+			{
 				capableNumHolder.numHeld = Integer.toString(v);
+			}
 			else
+			{
 				capableNumHolder.numHeld = "";
+			}
+		}
+
+		protected void changeStartEmpty(boolean b)
+		{
+			capableNumHolder.didSquareStartEmpty = b;
+		}
+
+		protected boolean wasSquareEmpty()
+		{
+			return capableNumHolder.didSquareStartEmpty;
 		}
 
 		protected String getNum()
@@ -409,28 +420,28 @@ public class PaintedObjects extends JFrame
 			return capableNumHolder.numHeld;
 		}
 
-		protected boolean getSolveAddStatus()
-		{
-			return capableNumHolder.beingAddedOnSolve;
-		}
-
-		protected void setFinalPossArray(Integer[] Input)
+		protected void setPossArray(Integer[] Input)
 		{
 			if(Input != null)
 			{
 				for(int i=0;i<Input.length;i++)
 				{
-					if(Input[i] != null)
-					{
+					if(Input[i] == null)
+						capableNumHolder.endPossArray[i] = "";
+					else
 						capableNumHolder.endPossArray[i] = Integer.toString(Input[i]);
-					}
 				}
 			}
 		}
 
-		protected void adjustSolve(Boolean b)
+		protected void adjustHumanSolve(Boolean b)
 		{
-			capableNumHolder.beingAddedOnSolve = b;
+			capableNumHolder.addedOnHumanSolve = b;
+		}
+
+		protected void adjustLastResort(Boolean b)
+		{
+			capableNumHolder.addedOnLastResort = b;
 		}
 
 		protected Point getDrawRec()
@@ -471,55 +482,3 @@ public class PaintedObjects extends JFrame
 	} // ClickButton class
 
 } // PaintedObjects
-
-
-class Square
-{
-
-	protected Integer result; // The final number that you see
-	protected Integer[] possArray; // Every possible number it could still be
-
-	protected boolean answerAtStart = false;
-
-	protected int ownRow;
-	protected int ownCol;
-	protected int ownBox;
-
-	protected int VARIETY; // Total amount of possibilities at start
-	protected int numPossLeft; // Number of possibilities left
-
-	private static int[][] findBox = new int[][]{ {0,1,2},
-												  {3,4,5},
-												  {6,7,8} };
-
-
-	// Constructor
-
-	protected Square(int selfRow, int selfCol)
-	{
-		// Initialize result to null
-
-		result = null;
-
-		// Fix own row and column
-
-		ownRow = selfRow;
-		ownCol = selfCol;
-		ownBox = findBox[selfRow/3][selfCol/3];
-
-		// Set full range of possibilities
-
-		VARIETY = 9;
-		numPossLeft = VARIETY;
-		possArray = new Integer[VARIETY];
-
-		// Every possibility is its index plus 1
-
-		for(int i=0;i<VARIETY;i++)
-		{ possArray[i] = i+1; }
-
-		// If result is finalized, result is not null and possArray is null
-		// If result is not finalized, result is null and possArray is not null
-	}
-
-} // Square
