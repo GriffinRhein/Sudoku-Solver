@@ -95,19 +95,19 @@ public class UsingLogicalMethods
 											SolveMethod.XY_Wing};
 
 		amountOfSolveMethods = 14;
-
+/*
 		System.out.println("");
 		System.out.println("");
 		System.out.println("NEW PUZZLE YEAH");
 		System.out.println("");
 		System.out.println("");
-
+*/
 	} // Constructor
 
 
 	// Until the detailed messages are added to
 	// the GUI, this will be used to output them
-
+/*
 	private void tempPrinter(String a)
 	{
 		System.out.println("~~~~~~~~~~");
@@ -116,7 +116,7 @@ public class UsingLogicalMethods
 		System.out.println("");
 		System.out.println("~~~~~~~~~~");
 	}
-
+*/
 
 	public void solveAllAtOnce()
 	{
@@ -158,14 +158,14 @@ public class UsingLogicalMethods
 
 
 			// If it made progress, get explanation of what happens
-
+/*
 			if(somethingChanged)
 			{
 				// Retrieve (and, for now, print) the relevant String
 
 				tempPrinter(stringPrint.getStepOutput(useForString[methodCounter]));
 			}
-
+*/
 
 			// Increment methodCounter, moving on to the next solving method
 

@@ -1,55 +1,41 @@
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-
 public class LastResort
 {
-	private PrimitiveSquare[][] computerSolveMap;
-
+	private FullSudoku mySudoku;
 	private boolean wasSolveSuccessful;
 
 	public LastResort(FullSudoku theSudoku)
 	{
-		computerSolveMap = new PrimitiveSquare[9][9];
+		mySudoku = theSudoku;
 		wasSolveSuccessful = false;
 
-		Integer a;
-		boolean b;
-		int c;
-		int d;
-		int e;
+
+		Square currentSquare;
 
 		for(int y=0;y<9;y++)
 		{
 			for(int x=0;x<9;x++)
 			{
-				a = theSudoku.SudokuMap[y][x].result;
-				b = false;   if(a != null){b = true;}
-				c = theSudoku.SudokuMap[y][x].ownRow;
-				d = theSudoku.SudokuMap[y][x].ownCol;
-				e = theSudoku.SudokuMap[y][x].ownBox;
+				currentSquare = mySudoku.SudokuMap[y][x];
 
-				computerSolveMap[y][x] = new PrimitiveSquare(a,b,c,d,e);
+				if(currentSquare.result != null)
+				{
+					currentSquare.lastResortResult = currentSquare.result;
+					currentSquare.lastResortIsResultFixed = true;
+				}
+				else
+				{
+					currentSquare.lastResortResult = null;
+					currentSquare.lastResortIsResultFixed = false;
+				}
 			}
 		}
-
-		// As a temporary measure to ensure that these primitive squares
-		// are not linked to the originals, they will be serialized.
-
-		serializeItAll();
 	}
-
-
-
 
 
 	// This should be the ONLY function outside of the constructor to do anything to FullSudoku.
 	// I also don't want it to be called by anything in here; call it in DrawNumsConstructor.
 
-	public void copyLastResortToSudoku(FullSudoku mySudoku)
+	public void copyLastResortToSudoku()
 	{
 		// As a precautionary measure, even this function will not do anything unless
 		// another solving method in this class changed wasSolveSuccessful to True.
@@ -60,26 +46,27 @@ public class LastResort
 			// set their numPossLeft to 1, set their possArray to null, and increment
 			// squaresSolved. We should end at 81 squaresSolved during any success.
 
-			Square presentSquare;
+			Square currentSquare;
 
 			for(int y=0;y<9;y++)
 			{
 				for(int x=0;x<9;x++)
 				{
-					presentSquare = mySudoku.SudokuMap[y][x];
+					currentSquare = mySudoku.SudokuMap[y][x];
 
-					if(presentSquare.result == null)
+					if(currentSquare.result == null)
 					{
-						presentSquare.numPossLeft = 1;
-						presentSquare.result = computerSolveMap[y][x].primResult;
-						presentSquare.possArray = null;
+						currentSquare.result = currentSquare.lastResortResult;
+						currentSquare.possArray = null;
+						currentSquare.numPossLeft = 1;
 
 						mySudoku.squaresSolved++;
 					}
 				}
 			}
 
-			// Then set every slot in the possPrevalence arrays to 1, just because.
+			// Then set every slot in the possPrevalence arrays to 1,
+			// since it's appropriate for a finished puzzle.
 
 			for(int i=0;i<9;i++)
 			{
@@ -95,28 +82,27 @@ public class LastResort
 
 			wasSolveSuccessful = false;
 		}
-	}
+
+	} // copyLastResortToSudoku()
 
 
-	// Called by DrawNumsConstructor to make there is no inconsistency between
-	// this and whatever UsingLogicalMethods came up with. I feel that it may
-	// not be necessary, but I'll keep it until I'm sure.
+	// Ensures that there is no inconsistency between what LastResort came up with
+	// and whatever UsingLogicalMethods came up with. I feel that it may not be
+	// necessary, but I'll keep it until I'm sure.
 
-	public boolean sameResults(FullSudoku mySudoku)
+	public boolean sameResults()
 	{
 		Square officialSquare;
-		PrimitiveSquare lastResortSquare;
 
 		for(int y=0;y<9;y++)
 		{
 			for(int x=0;x<9;x++)
 			{
 				officialSquare = mySudoku.SudokuMap[y][x];
-				lastResortSquare = computerSolveMap[y][x];
 
-				if(officialSquare.result != null && lastResortSquare.primResult != null)
+				if(officialSquare.result != null && officialSquare.lastResortResult != null)
 				{
-					if(!(officialSquare.result.equals(lastResortSquare.primResult)))
+					if(!(officialSquare.result.equals(officialSquare.lastResortResult)))
 						return false;
 				}
 			}
@@ -132,12 +118,9 @@ public class LastResort
 
 	public boolean initiateCrudeVirtualSolve()
 	{
-		boolean didItWork = crudeVirtualSolve();
+		wasSolveSuccessful = crudeVirtualSolve();
 
-		if(didItWork)
-			wasSolveSuccessful = true;
-
-		return didItWork;
+		return wasSolveSuccessful;
 	}
 
 
@@ -146,46 +129,51 @@ public class LastResort
 
 	private boolean crudeVirtualSolve()
 	{
-		// Set results in all unknown PrimitiveSquare to 0
+		Square currentSquare;
+
+
+		// Set all unknown results to 0
 
 		for(int y=0;y<9;y++)
 		{
 			for(int x=0;x<9;x++)
 			{
-				if(computerSolveMap[y][x].primResultFixed == false)
-					computerSolveMap[y][x].primResult = 0;
+				currentSquare = mySudoku.SudokuMap[y][x];
+
+				if(currentSquare.lastResortIsResultFixed == false)
+					currentSquare.lastResortResult = 0;
 			}
 		}
 
 
 		// Start at the beginning
 
-		PrimitiveSquare nowSquare = computerSolveMap[0][0];
+		currentSquare = mySudoku.SudokuMap[0][0];
 
 
-		// Find the first PrimitiveSquare which is not solved.
+		// Find the first square which is not solved.
 
 		// nextNeededSquare() gets you to the next blank, automatically
 		// moving forward at least one spot. But if the first square is not
 		// solved yet, we don't want to leave it; we want to start there.
 
-		if(nowSquare.primResultFixed)
+		if(currentSquare.lastResortIsResultFixed)
 		{
 			// Also, if nextNeededSquare gets you null at the
 			// beginning, then the puzzle is already solved
 
-			if(nextNeededSquare(nowSquare) == null)
+			if(nextNeededSquare(currentSquare) == null)
 			{
 				return true;
 			}
 
-			nowSquare = nextNeededSquare(nowSquare);
+			currentSquare = nextNeededSquare(currentSquare);
 		}
 
 
 		// Increment the result of the first unknown square, and BEGIN
 
-		nowSquare.primResult++;
+		currentSquare.lastResortResult++;
 
 		boolean moreToDo = true;
 
@@ -196,31 +184,31 @@ public class LastResort
 			isTheResultUnique = true;
 
 			// First, check whether this square's (new) result appears
-			// in an oval sharing a row/column/box with it
+			// in an square sharing a row/column/box with it
 
 			if(isTheResultUnique)
-				isTheResultUnique = noDupeOfResult(nowSquare,provideRow(nowSquare.primRow));
+				isTheResultUnique = noDupeOfResult(currentSquare,mySudoku.provideRow(currentSquare.ownRow));
 
 			if(isTheResultUnique)
-				isTheResultUnique = noDupeOfResult(nowSquare,provideCol(nowSquare.primCol));
+				isTheResultUnique = noDupeOfResult(currentSquare,mySudoku.provideCol(currentSquare.ownCol));
 
 			if(isTheResultUnique)
-				isTheResultUnique = noDupeOfResult(nowSquare,provideBox(nowSquare.primBox));
+				isTheResultUnique = noDupeOfResult(currentSquare,mySudoku.provideBox(currentSquare.ownBox));
 
 
-			// If the result is NOT unique, meaning it already appears in a
-			// square sharing a row/column/box with nowSquare, then we cannot
+			// If the result is NOT unique, meaning it already appears in a square
+			// sharing a row/column/box with the current square, then we cannot
 			// advance. Work has to be done on this square or a previous one
 
 			if(!(isTheResultUnique))
 			{
 				// If the current square's result has not yet reached 9
 
-				if(!(nowSquare.primResult.equals(9)))
+				if(!(currentSquare.lastResortResult.equals(9)))
 				{
 					// Increment it
 
-					nowSquare.primResult++;
+					currentSquare.lastResortResult++;
 
 					// Return to beginning of loop
 				}
@@ -237,36 +225,36 @@ public class LastResort
 						// If this takes you all the way back past the
 						// beginning, the puzzle cannot be solved.
 
-						if(prevNeededSquare(nowSquare) == null)
+						if(prevNeededSquare(currentSquare) == null)
 						{
 							return false;
 						}
 
-						nowSquare.primResult = 0;
-						nowSquare = prevNeededSquare(nowSquare);
+						currentSquare.lastResortResult = 0;
+						currentSquare = prevNeededSquare(currentSquare);
 
-					} while(nowSquare.primResult.equals(9));
+					} while(currentSquare.lastResortResult.equals(9));
 
 					// Increment it
 
-					nowSquare.primResult++;
+					currentSquare.lastResortResult++;
 
 					// Return to beginning of loop
 				}
 			}
 
 			// If the current result in this square is UNIQUE (for now) and does not
-			// appear in another oval within its row/column/box, we can proceed forward.
+			// appear in another square within its row/column/box, we can proceed forward.
 
 			else
 			{
 				// If we haven't reached the end, increment the
 				// result of the next square and keep going
 
-				if(nextNeededSquare(nowSquare) != null)
+				if(nextNeededSquare(currentSquare) != null)
 				{
-					nowSquare = nextNeededSquare(nowSquare);
-					nowSquare.primResult++;
+					currentSquare = nextNeededSquare(currentSquare);
+					currentSquare.lastResortResult++;
 
 					// Return to beginning of loop
 				}
@@ -286,12 +274,12 @@ public class LastResort
 	} // crudeVirtualSolve()
 
 
-	private PrimitiveSquare prevNeededSquare(PrimitiveSquare i)
+	private Square prevNeededSquare(Square i)
 	{
-		PrimitiveSquare squareToReturn = i;
+		Square squareToReturn = i;
 
-		int myRow = squareToReturn.primRow;
-		int myCol = squareToReturn.primCol;
+		int myRow = squareToReturn.ownRow;
+		int myCol = squareToReturn.ownCol;
 
 		do
 		{
@@ -307,19 +295,21 @@ public class LastResort
 			else
 				myCol--;
 
-			squareToReturn = computerSolveMap[myRow][myCol];
+			squareToReturn = mySudoku.SudokuMap[myRow][myCol];
 
-		} while(squareToReturn.primResultFixed);
+		} while(squareToReturn.lastResortIsResultFixed);
 
 		return squareToReturn;
-	}
 
-	private PrimitiveSquare nextNeededSquare(PrimitiveSquare i)
+	} // prevNeededSquare()
+
+
+	private Square nextNeededSquare(Square i)
 	{
-		PrimitiveSquare squareToReturn = i;
+		Square squareToReturn = i;
 
-		int myRow = squareToReturn.primRow;
-		int myCol = squareToReturn.primCol;
+		int myRow = squareToReturn.ownRow;
+		int myCol = squareToReturn.ownCol;
 
 		do
 		{
@@ -335,139 +325,28 @@ public class LastResort
 			else
 				myCol++;
 
-			squareToReturn = computerSolveMap[myRow][myCol];
+			squareToReturn = mySudoku.SudokuMap[myRow][myCol];
 
-		} while(squareToReturn.primResultFixed);
+		} while(squareToReturn.lastResortIsResultFixed);
 
 		return squareToReturn;
-	}
+
+	} // nextNeededSquare()
 
 
-	// Serialization functions
+	// Checks that an square's result does not appear
+	// in its RCB (except within the square itself)
 
-	private void serializeItAll()
+	private boolean noDupeOfResult(Square s, Square[] itsRCB)
 	{
-		for(int y=0;y<9;y++)
-		{
-			for(int x=0;x<9;x++)
-			{
-				try
-					{ SerializeSquare(computerSolveMap[y][x]); }
-				catch(Exception p)
-					{ }
-
-				try
-					{ computerSolveMap[y][x] = DeserializeSquare(); }
-				catch(Exception q)
-					{ }
-			}
-		}
-	}
-
-	private void SerializeSquare(PrimitiveSquare a) throws IOException
-	{
-		try
-		{
-			FileOutputStream fos = new FileOutputStream("Oval.obj");
-			ObjectOutputStream oos = new ObjectOutputStream(fos);
-			oos.writeObject(a);
-		}
-		catch(Exception p)
-		{
-
-		}
-	}
-
-	private PrimitiveSquare DeserializeSquare() throws IOException, ClassNotFoundException
-	{
-		PrimitiveSquare toReturn = null;
-
-		try
-		{
-			FileInputStream fis = new FileInputStream("Oval.obj");
-			ObjectInputStream ois = new ObjectInputStream(fis);
-			toReturn = (PrimitiveSquare)ois.readObject();
-		}
-		catch(Exception q)
-		{
-
-		}
-
-		return toReturn;
-    }
-
-
-	// Assists in traversing boxes
-
-	private int[][] boxesToCheck = new int[][]{	{0,1,2,0,1,2},
-												{0,1,2,3,4,5},
-												{0,1,2,6,7,8},
-												{3,4,5,0,1,2},
-												{3,4,5,3,4,5},
-												{3,4,5,6,7,8},
-												{6,7,8,0,1,2},
-												{6,7,8,3,4,5},
-												{6,7,8,6,7,8} };
-
-
-	// Provide a row of ovals
-
-	private PrimitiveSquare[] provideRow(int rowNum)
-	{
-		PrimitiveSquare[] rowProvided = new PrimitiveSquare[9];
-
-		for(int i=0;i<9;i++)
-		{
-			rowProvided[i] = computerSolveMap[rowNum][i];
-		}
-
-		return rowProvided;
-	}
-
-	// Provide a column of ovals
-
-	private PrimitiveSquare[] provideCol(int colNum)
-	{
-		PrimitiveSquare[] colProvided = new PrimitiveSquare[9];
-
-		for(int i=0;i<9;i++)
-		{
-			colProvided[i] = computerSolveMap[i][colNum];
-		}
-
-		return colProvided;
-
-	}
-
-	// Provide a box of ovals
-
-	private PrimitiveSquare[] provideBox(int boxNum)
-	{
-		PrimitiveSquare[] boxProvided = new PrimitiveSquare[9];
-
-		for(int i=0;i<9;i++)
-		{
-			boxProvided[i] = computerSolveMap[boxesToCheck[boxNum][i / 3]][boxesToCheck[boxNum][(i % 3) + 3]];
-		}
-
-		return boxProvided;
-
-	}
-
-
-	// Checks that an oval's result does not appear
-	// in its RCB (except within the oval itself)
-
-	private boolean noDupeOfResult(PrimitiveSquare s, PrimitiveSquare[] itsRCB)
-	{
-		Integer inputResult = s.primResult;
+		Integer inputResult = s.lastResortResult;
 		boolean noDupes = true;
 
 		for(int a=0;a<itsRCB.length;a++)
 		{
-			if(itsRCB[a].primResult.equals(inputResult))
+			if(itsRCB[a].lastResortResult.equals(inputResult))
 			{
-				if(!(itsRCB[a].primRow == s.primRow && itsRCB[a].primCol == s.primCol))
+				if(!(itsRCB[a].ownRow == s.ownRow && itsRCB[a].ownCol == s.ownCol))
 				{
 					noDupes = false;
 				}
@@ -475,26 +354,7 @@ public class LastResort
 		}
 
 		return noDupes;
-	}
 
-}
+	} // noDupeOfResult()
 
-class PrimitiveSquare implements Serializable
-{
-	protected Integer primResult;
-
-	protected boolean primResultFixed;
-
-	protected int primRow;
-	protected int primCol;
-	protected int primBox;
-
-	public PrimitiveSquare(Integer a, boolean b, int c, int d, int e)
-	{
-		primResult = a;
-		primResultFixed = b;
-		primRow = c;
-		primCol = d;
-		primBox = e;
-	}
-}
+} // LastResort class

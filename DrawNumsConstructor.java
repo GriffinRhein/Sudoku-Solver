@@ -407,7 +407,6 @@ public class DrawNumsConstructor extends PaintedObjects
 		{
 			// IMPROVE IN FUTURE
 
-			System.out.println("No further logic techniques currently possible.");
 			itsTheNextStepButton.setEnabled(false);
 			itsTheLastResortButton.setEnabled(true);
 		}
@@ -424,7 +423,7 @@ public class DrawNumsConstructor extends PaintedObjects
 		// Though, I'm not sure whether conflict is possible. UsingLogicalMethods works off certainty;
 		// I figure that it would never be able to make any moves down a branching path.
 
-		if(!(inputForLastResort.sameResults(ourSentSudoku)))
+		if(!(inputForLastResort.sameResults()))
 		{
 			inputForLastResort = new LastResort(ourSentSudoku);
 			inputForLastResort.initiateCrudeVirtualSolve();
@@ -433,7 +432,7 @@ public class DrawNumsConstructor extends PaintedObjects
 
 		// Use LastResort's function to copy its results into the Sudoku squares
 
-		inputForLastResort.copyLastResortToSudoku(ourSentSudoku);
+		inputForLastResort.copyLastResortToSudoku();
 
 
 		// Put everything in the GUI
