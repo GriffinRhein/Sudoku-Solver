@@ -520,7 +520,9 @@ public class DrawNumsConstructor extends PaintedObjects
 
 		if(ourSentSudoku.squaresSolved == 81)
 		{
-			completeText.append(bundleInTilde(puzzleDoneMessage));
+			String appendNow = incomingText+"\n\n"+puzzleDoneMessage;
+
+			completeText.append(bundleInTilde(appendNow));
 
 			setStepsButton(3);
 		}
