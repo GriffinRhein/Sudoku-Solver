@@ -1,3 +1,5 @@
+// Utilized by UsingLogicalMethods
+
 public class ClaimingPairsTriples
 {
 	// Look at a single row or column, and check whether

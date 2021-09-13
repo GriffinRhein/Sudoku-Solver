@@ -18,7 +18,6 @@ import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.KeyStroke;
-import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -26,72 +25,15 @@ import javax.swing.SwingUtilities;
 
 public class PaintedObjects extends JFrame
 {
-	// Number of rows & columns
+	public final static int gridSquareWidth = 60;
+	public final static int numColInGrid = 9;
+	public final static int gridTotalWidth = gridSquareWidth*numColInGrid;
+	public final static int numColBetweenThick = 3;
 
-	protected static int ROWS = 9;
-	protected static int COLS = 9;
-
-	// Color and size of the square highlight
-
-	private static Color ourRectColor = new Color(28,222,144);
-	protected static int ourRectWidth = 60;
-	protected static int ourRectHeight = 60;
-
-	// Current row & column of the square highlight
-
-	protected static int currentRow = 0;
-	protected static int currentCol = 0;
-
-	// Exact location of the square highlight
-
-	protected static Point ourRecLocation = new Point(100,100);
-
-	// Whether the arrow keys will currently move the square around
-	// and the number keys will enter numbers into the Sudoku
-
-	protected static boolean controlsOn = true;
-
-
-
-	// Rectangle object can paint itself
-
-	public class Rectangle
-	{
-		protected void paint(Graphics2D g2d)
-		{
-			// The variables needed to draw the thing are provided above
-
-			g2d.setColor(ourRectColor);
-			g2d.fillRect(ourRecLocation.x, ourRecLocation.y, ourRectWidth, ourRectHeight);
-		}
-
-	} // Rectangle class
-
-
-	// OurRectangle can create a Rectangle and call paint() on it
-
-	public class OurRectangle extends JPanel
-	{
-
-		private Rectangle capableRectangle;
-
-		public OurRectangle()
-		{
-			capableRectangle = new Rectangle();
-		}
-
-		@Override
-		protected void paintComponent(Graphics g)
-		{
-			super.paintComponent(g);
-			Graphics2D g2d = (Graphics2D)g.create();
-
-			capableRectangle.paint(g2d);
-
-			g2d.dispose();
-		}
-
-	} // OurRectangle class
+	public final static int gridSquareHeight = 60;
+	public final static int numRowInGrid = 9;
+	public final static int gridTotalHeight = gridSquareHeight*numRowInGrid;
+	public final static int numRowBetweenThick = 3;
 
 
 	// CoreGrid object can paint itself
@@ -103,7 +45,10 @@ public class PaintedObjects extends JFrame
 			BasicStroke thickerBorder = new BasicStroke(1.5F);
 			BasicStroke normalBorder = new BasicStroke(1F);
 
-			int counter = 0;
+			int rightX = gridSquareWidth*numColInGrid;
+			int bottomY = gridSquareHeight*numRowInGrid;
+
+			int handyCoord;
 
 			// Set color to black and the line to normal thickness
 			// When drawing, if the line you draw is line 0, 3, 6,or 9,
@@ -112,36 +57,42 @@ public class PaintedObjects extends JFrame
 			g2d.setColor(new Color(0,0,0));
 			g2d.setStroke(normalBorder);
 
-			// Draw Horizontal Lines
-
-			for(int i=100;i<=640;i+=60)
-			{
-				if(counter == 0 || counter == 3 || counter == 6 || counter == 9)
-					g2d.setStroke(thickerBorder);
-
-				g2d.drawLine(100,i,640,i);
-
-				if(counter == 0 || counter == 3 || counter == 6 || counter == 9)
-					g2d.setStroke(normalBorder);
-
-				counter++;
-			}
-
-			counter = 0;
 
 			// Draw Vertical Lines
 
-			for(int i=100;i<=640;i+=60)
+			for(int i=0;i<=numColInGrid;i++)
 			{
-				if(counter == 0 || counter == 3 || counter == 6 || counter == 9)
+				handyCoord = i*gridSquareWidth;
+
+				if(i % numColBetweenThick == 0)
+				{
 					g2d.setStroke(thickerBorder);
-
-				g2d.drawLine(i,100,i,640);
-
-				if(counter == 0 || counter == 3 || counter == 6 || counter == 9)
+					g2d.drawLine(handyCoord,0,handyCoord,gridTotalHeight);
 					g2d.setStroke(normalBorder);
+				}
+				else
+				{
+					g2d.drawLine(handyCoord,0,handyCoord,gridTotalHeight);
+				}
+			}
 
-				counter++;
+
+			// Draw Horizontal Lines
+
+			for(int j=0;j<=numRowInGrid;j++)
+			{
+				handyCoord = j*gridSquareHeight;
+
+				if(j % numRowBetweenThick == 0)
+				{
+					g2d.setStroke(thickerBorder);
+					g2d.drawLine(0,handyCoord,gridTotalWidth,handyCoord);
+					g2d.setStroke(normalBorder);
+				}
+				else
+				{
+					g2d.drawLine(0,handyCoord,gridTotalWidth,handyCoord);
+				}
 			}
 
 		}
@@ -174,6 +125,63 @@ public class PaintedObjects extends JFrame
 	} // OurCoreGrid class
 
 
+
+	// Color and size of the highlight
+
+	private final static Color ourRectColor = new Color(28,222,144);
+
+	public static int ourRectWidth = gridSquareWidth;
+	public static int ourRectHeight = gridSquareHeight;
+
+
+	// Exact location of the highlight
+
+	public static Point ourRecLocation = new Point(0,0);
+
+
+	// Rectangle object can paint itself
+
+	public class Rectangle
+	{
+		protected void paint(Graphics2D g2d)
+		{
+			// The variables needed to draw the thing are provided above
+
+			g2d.setColor(ourRectColor);
+			g2d.fillRect(ourRecLocation.x, ourRecLocation.y, ourRectWidth, ourRectHeight);
+		}
+
+	} // Rectangle class
+
+
+	// OurRectangle can create a Rectangle and call paint() on it
+
+	public class OurRectangle extends JPanel
+	{
+		private Rectangle capableRectangle;
+
+		public OurRectangle()
+		{
+			capableRectangle = new Rectangle();
+		}
+
+		@Override
+		protected void paintComponent(Graphics g)
+		{
+			super.paintComponent(g);
+			Graphics2D g2d = (Graphics2D)g.create();
+
+			capableRectangle.paint(g2d);
+
+			g2d.dispose();
+		}
+
+	} // OurRectangle class
+
+
+
+
+
 	// Create the fonts and the metrics
 
 	protected Color theBlack = new Color(0,0,0);
@@ -195,6 +203,7 @@ public class PaintedObjects extends JFrame
 
 
 	// SolveText object can paint itself
+	// Currently NOT USED
 
 	public class SolveText
 	{
@@ -221,7 +230,7 @@ public class PaintedObjects extends JFrame
 			if(numSquaresSolved != null && numSquaresSolved.equals(81))
 					shownMessage = completeString;
 
-			shownMessX = (100+(100+540))/2 - smallerFM.stringWidth(shownMessage)/2;
+			shownMessX = (100+640)/2 - smallerFM.stringWidth(shownMessage)/2;
 			g2d.drawString(shownMessage,shownMessX,shownMessY);
 		}
 
@@ -229,6 +238,7 @@ public class PaintedObjects extends JFrame
 
 
 	// OurSolveText can create a SolveText and call paint() on it
+	// Currently NOT USED
 
 	public class OurSolveText extends JPanel
 	{
@@ -263,6 +273,63 @@ public class PaintedObjects extends JFrame
 	} // OurSolveText class
 
 
+	// RowColLabel object can paint itself
+
+	public class RowColLabel
+	{
+		private String labelString;
+
+		private HouseType rowOrCol;
+		private int whichRowCol;
+
+		private int locY = gridSquareHeight/2 - possArrayFontFM.getHeight()/2 + possArrayFontFM.getAscent();
+		private int locX;
+
+		public RowColLabel(HouseType a, int b)
+		{
+			rowOrCol = a;
+			whichRowCol = b;
+
+			labelString = Integer.toString(whichRowCol+1);
+			locX = gridSquareWidth/2 - possArrayFontFM.stringWidth(labelString)/2;
+		}
+
+		protected void paint(Graphics2D g2d)
+		{
+			g2d.setColor(theBlack);
+			g2d.setFont(possArrayFont);
+
+			g2d.drawString(labelString,locX,locY);
+		}
+
+	} // RowColLabel Class
+
+
+	// OurRowColLabel can create a RowColLabel and call paint() on it
+
+	public class OurRowColLabel extends JPanel
+	{
+		private RowColLabel capableRowColLabel;
+
+		public OurRowColLabel(HouseType a, int b)
+		{
+			capableRowColLabel = new RowColLabel(a,b);
+		}
+
+		@Override
+		protected void paintComponent(Graphics g)
+		{
+			super.paintComponent(g);
+			Graphics2D g2d = (Graphics2D)g.create();
+
+			capableRowColLabel.paint(g2d);
+
+			g2d.dispose();
+		}
+
+	} // OurRowColLabel class
+
+
 	// NumHolder object can paint itself
 
 	public class NumHolder
@@ -273,9 +340,7 @@ public class PaintedObjects extends JFrame
 		protected int ownRow;
 		protected int ownCol;
 
-		protected Point whereToDrawRec;
-
-		protected int pracY = (100+(100+60))/2 - fm.getHeight()/2 + fm.getAscent();
+		protected int pracY = gridSquareHeight/2 - fm.getHeight()/2 + fm.getAscent();
 		protected int pracX;
 
 		protected int possArrayPracY;
@@ -306,10 +371,6 @@ public class PaintedObjects extends JFrame
 
 			ownRow = selfRow;
 			ownCol = selfCol;
-
-			// Fix where to draw rectangle
-
-			whereToDrawRec = new Point(100+60*ownCol,100+60*ownRow);
 		}
 
 		protected void resetItAll()
@@ -337,10 +398,10 @@ public class PaintedObjects extends JFrame
 
 				for(int w=0;w<endPossArray.length;w++)
 				{
-					possArrayPracY = (100+(100+20))/2 - possArrayFontFM.getHeight()/2 + possArrayFontFM.getAscent() + howFarY[w];
-					possArrayPracX = (100+(100+20))/2 - possArrayFontFM.stringWidth(endPossArray[w])/2 + howFarX[w];
+					possArrayPracY = 10 - possArrayFontFM.getHeight()/2 + possArrayFontFM.getAscent() + howFarY[w];
+					possArrayPracX = 10 - possArrayFontFM.stringWidth(endPossArray[w])/2 + howFarX[w];
 
-					g2d.drawString(endPossArray[w],possArrayPracX+ownCol*60,possArrayPracY+ownRow*60);
+					g2d.drawString(endPossArray[w],possArrayPracX,possArrayPracY);
 
 				}
 			}
@@ -351,8 +412,8 @@ public class PaintedObjects extends JFrame
 
 				g2d.setFont(myFont);
 
-				pracX = (100+(100+60))/2 - fm.stringWidth(numHeld)/2;
-				g2d.drawString(numHeld,pracX+ownCol*60,pracY+ownRow*60);
+				pracX = gridSquareWidth/2 - fm.stringWidth(numHeld)/2;
+				g2d.drawString(numHeld,pracX,pracY);
 			}
 
 
@@ -362,8 +423,8 @@ public class PaintedObjects extends JFrame
 
 				g2d.setFont(myFont);
 
-				pracX = (100+(100+60))/2 - fm.stringWidth(numHeld)/2;
-				g2d.drawString(numHeld,pracX+ownCol*60,pracY+ownRow*60);
+				pracX = gridSquareWidth/2 - fm.stringWidth(numHeld)/2;
+				g2d.drawString(numHeld,pracX,pracY);
 			}
 
 			else
@@ -372,8 +433,8 @@ public class PaintedObjects extends JFrame
 
 				g2d.setFont(myFont);
 
-				pracX = (100+(100+60))/2 - fm.stringWidth(numHeld)/2;
-				g2d.drawString(numHeld,pracX+ownCol*60,pracY+ownRow*60);
+				pracX = gridSquareWidth/2 - fm.stringWidth(numHeld)/2;
+				g2d.drawString(numHeld,pracX,pracY);
 			}
 
 
@@ -444,11 +505,6 @@ public class PaintedObjects extends JFrame
 			capableNumHolder.addedOnLastResort = b;
 		}
 
-		protected Point getDrawRec()
-		{
-			return capableNumHolder.whereToDrawRec;
-		}
-
 		protected void resetNumHolder()
 		{
 			capableNumHolder.resetItAll();
@@ -466,19 +522,5 @@ public class PaintedObjects extends JFrame
 		}
 
 	} // OurNumHolder class
-
-
-	// ClickButton. It's a button.
-
-	public class ClickButton extends JButton
-	{
-		private JButton capableButton;
-
-		public ClickButton()
-		{
-			capableButton = new JButton();
-		}
-
-	} // ClickButton class
 
 } // PaintedObjects

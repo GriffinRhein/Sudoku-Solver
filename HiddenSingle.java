@@ -1,5 +1,21 @@
+// Utilized by UsingLogicalMethods
+
 public class HiddenSingle
 {
+	// Check each row, column, and box to see whether
+	// any number which does not yet exist as a result
+	// in that house has been killed as a possibility
+	// for all but one square.
+
+	// Should one such number be found, the square where
+	// it remains in the possArray will lose everything
+	// in that possArray except for our number.
+
+	// Then, since elimFromPossArray() is guaranteed to
+	// put that square in the Linked List, and there is
+	// not much point in making a separate step out of
+	// setting the result, call NakedSingle()
+
 	private FullSudoku mySudoku;
 	private MethodExplanations myMethods;
 

@@ -14,6 +14,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.InputEvent;
 
+import java.lang.StringBuilder;
+
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
@@ -22,11 +24,34 @@ import javax.swing.KeyStroke;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JTextArea;
+import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 public class DrawNumsConstructor extends PaintedObjects
 {
+	// Coordinates at which the Sudoku grid starts and ends
+
+	public final static int gridLeftX = 100;
+	public final static int gridRightX = gridLeftX+gridTotalWidth;
+
+	public final static int gridTopY = 100;
+	public final static int gridBottomY = gridTopY+gridTotalHeight;
+
+
+	// Current row & column we are highlighting
+
+	public static int currentCol = 0;
+	public static int currentRow = 0;
+
+
+	// Whether the arrow keys will currently move the square around
+	// and the number keys will enter numbers into the Sudoku
+
+	public static boolean controlsOn;
+
+
 	// Declare all of the KeyStrokes we will need,
 	// and create the Rectangle and CoreGrid as well as
 	// our array of numHolders to resemble the grid
@@ -50,19 +75,37 @@ public class DrawNumsConstructor extends PaintedObjects
 	KeyStroke pressEnter = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,0);
 
 
+	StringBuilder completeText = null;
+
+	String noProgressMessage = "No further progress can be made with the integrated logical methods.";
+	String lastResortMessage = "Puzzle is complete, through trial and error.";
+	String puzzleDoneMessage = "Puzzle is complete!";
+
+	JTextArea itsTheTextArea = new JTextArea();
+
+
+	int vertScrollPolicy = JScrollPane.VERTICAL_SCROLLBAR_ALWAYS;
+	int horiScrollPolicy = JScrollPane.HORIZONTAL_SCROLLBAR_NEVER;
+
+	JScrollPane itsTheScrollPane = new JScrollPane(itsTheTextArea,vertScrollPolicy,horiScrollPolicy);
+
+
 	OurRectangle recToWorkWith = new OurRectangle();
 	OurCoreGrid gridToWorkWith = new OurCoreGrid();
 	OurNumHolder[][] fillInMap = new OurNumHolder[9][9];
-	OurSolveText textToWorkWith = new OurSolveText();
+	OurSolveText completeBanner = new OurSolveText();
 
-	ClickButton itsTheResetButton = new ClickButton();
-	ClickButton itsTheSolveButton = new ClickButton();
-	ClickButton itsTheUndoSolveButton = new ClickButton();
-	ClickButton itsTheSaveSudokuButton = new ClickButton();
-	ClickButton itsTheLoadSudokuButton = new ClickButton();
-	ClickButton itsTheBeginStepsButton = new ClickButton();
-	ClickButton itsTheNextStepButton = new ClickButton();
-	ClickButton itsTheLastResortButton = new ClickButton();
+	OurRowColLabel[] rowLabels = new OurRowColLabel[9];
+	OurRowColLabel[] colLabels = new OurRowColLabel[9];
+
+	JButton itsTheResetButton = new JButton();
+	JButton itsTheSolveButton = new JButton();
+	JButton itsTheUndoSolveButton = new JButton();
+	JButton itsTheSaveSudokuButton = new JButton();
+	JButton itsTheLoadSudokuButton = new JButton();
+	JButton itsTheBeginStepsButton = new JButton();
+
+
 
 	String[][] stringCompForFinal = new String[9][9];
 
@@ -71,7 +114,8 @@ public class DrawNumsConstructor extends PaintedObjects
 	JButtonCommands itsTheButtonCommands = new JButtonCommands(this);
 
 	FullSudoku ourSentSudoku;
-	SolveChecker ourSolveChecker;
+
+	CheckStartingNums ourStartChecker;
 
 	UsingLogicalMethods inputForSolving;
 
@@ -142,15 +186,15 @@ public class DrawNumsConstructor extends PaintedObjects
 			{
 				case Right:
 
-					if(currentCol != 8)
+					if(currentCol != numColInGrid-1)
 					{
 						currentCol++;
-						ourRecLocation.x += 60;
+						ourRecLocation.x += gridSquareWidth;
 					}
 					else
 					{
 						currentCol = 0;
-						ourRecLocation.x = 100;
+						ourRecLocation.x = 0;
 					}
 					break;
 
@@ -159,12 +203,12 @@ public class DrawNumsConstructor extends PaintedObjects
 					if(currentCol != 0)
 					{
 						currentCol--;
-						ourRecLocation.x -= 60;
+						ourRecLocation.x -= gridSquareWidth;
 					}
 					else
 					{
-						currentCol = 8;
-						ourRecLocation.x = 580;
+						currentCol = numColInGrid-1;
+						ourRecLocation.x = gridTotalWidth-gridSquareWidth;
 					}
 					break;
 
@@ -173,26 +217,26 @@ public class DrawNumsConstructor extends PaintedObjects
 					if(currentRow != 0)
 					{
 						currentRow--;
-						ourRecLocation.y -= 60;
+						ourRecLocation.y -= gridSquareHeight;
 					}
 					else
 					{
-						currentRow = 8;
-						ourRecLocation.y = 580;
+						currentRow = numRowInGrid-1;
+						ourRecLocation.y = gridTotalHeight-gridSquareHeight;
 					}
 					break;
 
 				case Down:
 
-					if(currentRow != 8)
+					if(currentRow != numRowInGrid-1)
 					{
 						currentRow++;
-						ourRecLocation.y += 60;
+						ourRecLocation.y += gridSquareHeight;
 					}
 					else
 					{
 						currentRow = 0;
-						ourRecLocation.y = 100;
+						ourRecLocation.y = 0;
 					}
 					break;
 			}
@@ -253,10 +297,58 @@ public class DrawNumsConstructor extends PaintedObjects
 	{
 		public void actionPerformed(ActionEvent e)
 		{
-			enactLastResort();
+			enactLastResort(false);
 		}
 	};
 
+	Action nothingAction = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+
+		}
+	};
+
+	private void setStepsButton(int a)
+	{
+		switch(a)
+		{
+			case 0:
+
+			itsTheBeginStepsButton.setAction(slowSolveStartAction);
+			itsTheBeginStepsButton.setText("Step-By-Step Solve");
+			itsTheBeginStepsButton.setEnabled(true);
+
+			break;
+
+
+			case 1:
+
+			itsTheBeginStepsButton.setAction(advanceStepAction);
+			itsTheBeginStepsButton.setText("Next Step");
+			itsTheBeginStepsButton.setEnabled(true);
+
+			break;
+
+
+			case 2:
+
+			itsTheBeginStepsButton.setAction(lastResortAction);
+			itsTheBeginStepsButton.setText("Last Resort");
+			itsTheBeginStepsButton.setEnabled(true);
+
+			break;
+
+
+			case 3:
+
+			itsTheBeginStepsButton.setAction(nothingAction);
+			itsTheBeginStepsButton.setText("");
+			itsTheBeginStepsButton.setEnabled(false);
+
+			break;
+		}
+	}
 
 	// Begin solving procedures
 
@@ -268,30 +360,30 @@ public class DrawNumsConstructor extends PaintedObjects
 		// was entered, so you can count on that being in all
 		// spots of stringCompForFinal thought of as empty
 
-		for(int i=0;i<ROWS;i++)
+		for(int i=0;i<numRowInGrid;i++)
 		{
-			for(int j=0;j<COLS;j++)
+			for(int j=0;j<numColInGrid;j++)
 			{
 				stringCompForFinal[i][j] = fillInMap[i][j].getNum();
 			}
 		}
 
 
-		// Create the SolveChecker, out of the numbers entered
+		// Create the CheckStartingNums, out of the numbers entered
 
-		ourSolveChecker = new SolveChecker(stringCompForFinal);
+		ourStartChecker = new CheckStartingNums(stringCompForFinal);
 
 
 		// Make sure the user has not inserted duplicates within a row/column/box
 
-		if(!(ourSolveChecker.isEntryDupeFree()))
+		if(!(ourStartChecker.isEntryDupeFree()))
 		{
 			itsThePopUpPane.showInsertedDupeMessage();
 		}
 
 		// Make sure the user has entered at least 17 numbers
 
-		else if(!(ourSolveChecker.areThereSeventeenClues()))
+		else if(!(ourStartChecker.areThereSeventeenClues()))
 		{
 			itsThePopUpPane.showNotEnoughCluesMessage();
 		}
@@ -336,27 +428,33 @@ public class DrawNumsConstructor extends PaintedObjects
 				inputForSolving = new UsingLogicalMethods(ourSentSudoku);
 
 				if(allAtOnce)
+				{
+					setStepsButton(3);
+
 					oneBigSolve();
+				}
 				else
 				{
+					setStepsButton(1);
+
+					completeText = new StringBuilder(bundleInTilde("Puzzle Start!"));
 					updateCurrentStatus(0,true);
-					itsTheNextStepButton.setEnabled(true);
 				}
 			}
 		}
 	}
 
 
-	// Update the GUI to show the current state of the Sudoku
+	// Update the UI to show the current state of the Sudoku
 	// pointOfSolve: 0 for initial fill, 1 for logical solve, 2 for last resort
 
 	private void updateCurrentStatus(int pointOfSolve, boolean displayImmediately)
 	{
 		// Give the PaintedObjects the information
 
-		for(int i=0;i<ROWS;i++)
+		for(int i=0;i<numRowInGrid;i++)
 		{
-			for(int j=0;j<COLS;j++)
+			for(int j=0;j<numColInGrid;j++)
 			{
 				if(fillInMap[i][j].getNum().equals(""))
 				{
@@ -374,49 +472,118 @@ public class DrawNumsConstructor extends PaintedObjects
 			}
 		}
 
-		textToWorkWith.setNumSquaresSolved(ourSentSudoku.squaresSolved);
+		completeBanner.setNumSquaresSolved(ourSentSudoku.squaresSolved);
 
 
 		if(displayImmediately)
 		{
 			// Display it
 
-			for(int i=0;i<ROWS;i++)
+			for(int i=0;i<numRowInGrid;i++)
 			{
-				for(int j=0;j<COLS;j++)
+				for(int j=0;j<numColInGrid;j++)
 				{
 					fillInMap[i][j].repaint();
 				}
 			}
 
-			textToWorkWith.repaint();
+			completeBanner.repaint();
+
+
+			itsTheTextArea.append(completeText.toString());
+
+			completeText = null;
 		}
 
 	} // updateCurrentStatus()
 
 
+	// Surrounds a String with tildes and blank lines, for now
+
+	public String bundleInTilde(String a)
+	{
+		String toReturn = "~~~~~~~~~~"+"\n"+a+"\n"+"~~~~~~~~~~"+"\n";
+
+		return toReturn;
+
+	} // bundleInTilde()
+
+
+	// Solve only one step
+
 	private void advanceOneStep()
 	{
-		boolean didWeDoSomething = inputForSolving.solveOneStep();
+		completeText = new StringBuilder("");
 
-		updateCurrentStatus(1,true);
+		String incomingText = inputForSolving.solveOneStep();
+
 
 		if(ourSentSudoku.squaresSolved == 81)
-			itsTheNextStepButton.setEnabled(false);
-		else if(!(didWeDoSomething))
 		{
-			// IMPROVE IN FUTURE
+			completeText.append(bundleInTilde(puzzleDoneMessage));
 
-			itsTheNextStepButton.setEnabled(false);
-			itsTheLastResortButton.setEnabled(true);
+			setStepsButton(3);
 		}
+		else if(incomingText == null)
+		{
+			completeText.append(bundleInTilde(noProgressMessage));
+
+			setStepsButton(2);
+		}
+		else
+		{
+			completeText.append(bundleInTilde(incomingText));
+		}
+
+
+		updateCurrentStatus(1,true);
 
 	} // advanceOneStep()
 
 
+	// Solve all at once
+
+	private void oneBigSolve()
+	{
+		completeText = new StringBuilder("");
+
+		String incomingText;
+
+
+		completeText.append(bundleInTilde("Puzzle Start!"));
+
+		do
+		{
+			incomingText = inputForSolving.solveOneStep();
+
+			if(incomingText != null)
+			{
+				completeText.append(bundleInTilde(incomingText));
+			}
+		}
+		while(incomingText != null);
+
+
+		if(ourSentSudoku.squaresSolved == 81)
+		{
+			completeText.append(bundleInTilde(puzzleDoneMessage));
+
+			updateCurrentStatus(1,true);
+		}
+		else
+		{
+			completeText.append(bundleInTilde(noProgressMessage));
+
+			updateCurrentStatus(1,false);
+			enactLastResort(true);
+		}
+
+	} // oneBigSolve()
+
+
 	// Last Resort once logic techniques run out
 
-	private void enactLastResort()
+	private void enactLastResort(boolean calledInOneBigSolve)
 	{
 		// Should the user input a Sudoku with more than one solution, this check guarantees that the
 		// solution found by LastResort does not conflict with any work done by UsingLogicalMethods.
@@ -435,33 +602,22 @@ public class DrawNumsConstructor extends PaintedObjects
 		inputForLastResort.copyLastResortToSudoku();
 
 
-		// Put everything in the GUI
+		// Put everything in the UI
+
+		if(calledInOneBigSolve)
+		{
+			completeText.append(bundleInTilde(lastResortMessage));
+		}
+		else
+		{
+			completeText = new StringBuilder(bundleInTilde(lastResortMessage));
+
+			setStepsButton(3);
+		}
 
 		updateCurrentStatus(2,true);
 
-
-		// Disable the Last Resort button, if it is on
-
-		itsTheLastResortButton.setEnabled(false);
-
 	} // enactLastResort()
-
-
-	// Solve all at once
-
-	private void oneBigSolve()
-	{
-		inputForSolving.solveAllAtOnce();
-
-		if(ourSentSudoku.squaresSolved == 81)
-			updateCurrentStatus(1,true);
-		else
-		{
-			updateCurrentStatus(1,false);
-			enactLastResort();
-		}
-
-	} // oneBigSolve()
 
 
 	// Turn user controls off
@@ -474,7 +630,10 @@ public class DrawNumsConstructor extends PaintedObjects
 		itsTheSolveButton.setEnabled(false);
 		itsTheUndoSolveButton.setEnabled(true);
 		itsTheLoadSudokuButton.setEnabled(false);
-		itsTheBeginStepsButton.setEnabled(false);
+
+		// Nothing here about the beginStepsButton;
+		// that has to be handled separately on the
+		// one occasion this function is called.
 
 		controlsOn = false;
 	}
@@ -506,13 +665,11 @@ public class DrawNumsConstructor extends PaintedObjects
 		itsTheSolveButton.setEnabled(true);
 		itsTheUndoSolveButton.setEnabled(false);
 		itsTheLoadSudokuButton.setEnabled(true);
-		itsTheBeginStepsButton.setEnabled(true);
-		itsTheNextStepButton.setEnabled(false);
-		itsTheLastResortButton.setEnabled(false);
+
+		setStepsButton(0);
 
 		controlsOn = true;
 	}
-
 
 
 	// Resets entire program to starting state
@@ -578,156 +735,159 @@ public class DrawNumsConstructor extends PaintedObjects
 
 	public DrawNumsConstructor()
 	{
-		// At the start, all we have is an array of empty
-		// spots, each designated for an OurNumHolder, so
-		// we need to actually fill it up with the things
-
-		for(int i=0;i<ROWS;i++)
-		{
-			for(int j=0;j<COLS;j++)
-			{
-				fillInMap[i][j] = new OurNumHolder(i,j);
-			}
-		}
-
-// ~~~~~~~~~~~~~~~~~~~~
-
-		// Now, the Rectangle, the CoreGrid, and every NumHolder
-		// is placed into a series of parent/child relationships
-		// with one another to draw all of them onto a JFrame
-
-// ~~~~~~~~~~~~~~~~~~~~
-
-		// The Rectangle will go in the back, so it is given a
-		// BorderLayout first, and the grid is added to that BorderLayout.
-		// The grid's JPanel is also set to be see-through anywhere it
-		// is not drawing anything
-
-		recToWorkWith.setOpaque(false);
-		recToWorkWith.setLayout( new BorderLayout() );
-		recToWorkWith.add(gridToWorkWith);
-		gridToWorkWith.setOpaque(false);
-
-// ~~~~~~~~~~~~~~~~~~~~
-
-		// Now we do something similar for each NumHolder. The first
-		// one is given to a BorderLayout for the CoreGrid, and each
-		// after that is given to a BorderLayout for the previous
-		// NumHolder. This is done (for now) because by default any
-		// BorderLayout can display only one object at a time
-
-		gridToWorkWith.setLayout( new BorderLayout() );
-		gridToWorkWith.add(fillInMap[0][0]);
-		fillInMap[0][0].setOpaque(false);
-
-		for(int i=0;i<ROWS;i++)
-		{
-			for(int j=0;j<COLS;j++)
-			{
-				// Create a BorderLayout and add the next OurNumHolder to it,
-				// then move to that OurNumHolder and create another
-				// BorderLayout, etc., until you reach the end
-
-				if( !( i==ROWS-1 && j==COLS-1) )
-				{
-					fillInMap[i][j].setLayout( new BorderLayout() );
-
-					// If you're not at the end of a row, the OurNumHolder which
-					// goes in your BorderLayout is the next one in the row
-
-					if( j != COLS-1 )
-					{
-						fillInMap[i][j].add(fillInMap[i][j+1]);
-						fillInMap[i][j+1].setOpaque(false);
-					}
-
-					// If you're at the end of a row, the OurNumHolder which
-					// goes in your BorderLayout is the first one in the next row
-
-					else
-					{
-						fillInMap[i][j].add(fillInMap[i+1][0]);
-						fillInMap[i+1][0].setOpaque(false);
-					}
-				}
-			}
-		}
-
-		fillInMap[8][8].setLayout( new BorderLayout() );
-		fillInMap[8][8].add( textToWorkWith );
-		textToWorkWith.setOpaque( false );
+		setLayout(null);
 
 
-		textToWorkWith.setLayout(null);
+		// ~~~~~~~~~~ 
+		// Implement Buttons & Text Area
+		// ~~~~~~~~~~
 
-		// This is the Reset Button which sets the rectangle back to
-		// Row 0, Column 0, and empties the sudoku & comments
-
-		textToWorkWith.add(itsTheResetButton);
-		itsTheResetButton.setAction(resetSudoku);
-		itsTheResetButton.setBounds(130,700,120,25);
-		itsTheResetButton.setText("Reset All");
-		itsTheResetButton.setFocusPainted(false);
-
-		// Solve Button
-
-		textToWorkWith.add(itsTheSolveButton);
-		itsTheSolveButton.setAction(enterAction);
-		itsTheSolveButton.setBounds(280,690,180,45);
-		itsTheSolveButton.setText("Solve Sudoku");
-		itsTheSolveButton.setFocusPainted(false);
-
-		// Undo Solve Button
-
-		textToWorkWith.add(itsTheUndoSolveButton);
-		itsTheUndoSolveButton.setAction(undoTheSolve);
-		itsTheUndoSolveButton.setBounds(490,700,120,25);
-		itsTheUndoSolveButton.setText("Undo Solve");
-		itsTheUndoSolveButton.setFocusPainted(false);
 
 		// Save Sudoku Button
 
-		textToWorkWith.add(itsTheSaveSudokuButton);
-		itsTheSaveSudokuButton.setAction(saveTheSudoku);
-		itsTheSaveSudokuButton.setBounds(670,280,180,60);
-		itsTheSaveSudokuButton.setText("Save Sudoku");
+		itsTheSaveSudokuButton.setBounds(130,665,120,25);
 		itsTheSaveSudokuButton.setFocusPainted(false);
+		add(itsTheSaveSudokuButton);
+
+		itsTheSaveSudokuButton.setAction(saveTheSudoku);
+		itsTheSaveSudokuButton.setText("Save Sudoku");
 
 
 		// Load Sudoku Button
 
-		textToWorkWith.add(itsTheLoadSudokuButton);
-		itsTheLoadSudokuButton.setAction(loadTheSudoku);
-		itsTheLoadSudokuButton.setBounds(670,400,180,60);
-		itsTheLoadSudokuButton.setText("Load Sudoku");
+		itsTheLoadSudokuButton.setBounds(130,715,120,25);
 		itsTheLoadSudokuButton.setFocusPainted(false);
+		add(itsTheLoadSudokuButton);
+
+		itsTheLoadSudokuButton.setAction(loadTheSudoku);
+		itsTheLoadSudokuButton.setText("Load Sudoku");
+
+
+		// Reset Button
+
+		itsTheResetButton.setBounds(490,665,120,25);
+		itsTheResetButton.setFocusPainted(false);
+		add(itsTheResetButton);
+
+		itsTheResetButton.setAction(resetSudoku);
+		itsTheResetButton.setText("Reset All");
+
+
+		// Undo Solve Button
+
+		itsTheUndoSolveButton.setBounds(490,715,120,25);
+		itsTheUndoSolveButton.setFocusPainted(false);
+		add(itsTheUndoSolveButton);
+
+		itsTheUndoSolveButton.setAction(undoTheSolve);
+		itsTheUndoSolveButton.setText("Undo Solve");
+
+
+		// Solve Button
+
+		itsTheSolveButton.setBounds(280,655,180,45);
+		itsTheSolveButton.setFocusPainted(false);
+		add(itsTheSolveButton);
+
+		itsTheSolveButton.setAction(enterAction);
+		itsTheSolveButton.setText("Full Solve");
 
 
 		// Begin Steps Button
 
-		textToWorkWith.add(itsTheBeginStepsButton);
-		itsTheBeginStepsButton.setAction(slowSolveStartAction);
-		itsTheBeginStepsButton.setBounds(700,625,150,20);
-		itsTheBeginStepsButton.setText("Begin Slow Solve");
+		itsTheBeginStepsButton.setBounds(280,715,180,25);
 		itsTheBeginStepsButton.setFocusPainted(false);
+		add(itsTheBeginStepsButton);
 
 
-		// Next Step Button
+		// Scroll Pane & Text Area
 
-		textToWorkWith.add(itsTheNextStepButton);
-		itsTheNextStepButton.setAction(advanceStepAction);
-		itsTheNextStepButton.setBounds(700,665,150,20);
-		itsTheNextStepButton.setText("Next Step");
-		itsTheNextStepButton.setFocusPainted(false);
+		itsTheScrollPane.setBounds(675,100,425,540);
+		itsTheScrollPane.setFocusable(false);
+
+		itsTheTextArea.setLineWrap(true);
+		itsTheTextArea.setWrapStyleWord(true);
+		itsTheTextArea.setEditable(false);
+		itsTheTextArea.setFocusable(false);
+
+		add(itsTheScrollPane);
 
 
-		// Last Resort Button
+		// ~~~~~~~~~~ 
+		// ~~~~~~~~~~
+		// ~~~~~~~~~~
 
-		textToWorkWith.add(itsTheLastResortButton);
-		itsTheLastResortButton.setAction(lastResortAction);
-		itsTheLastResortButton.setBounds(700,705,150,20);
-		itsTheLastResortButton.setText("Last Resort");
-		itsTheLastResortButton.setFocusPainted(false);
+
+		// Add Square Highlight
+
+		recToWorkWith.setOpaque(false);
+		recToWorkWith.setBounds(gridLeftX,gridTopY,gridTotalWidth,gridTotalHeight);
+
+		add(recToWorkWith);
+
+		recToWorkWith.setLayout(null);
+
+
+		// Draw Sudoku Grid Lines
+
+		gridToWorkWith.setOpaque(false);
+		gridToWorkWith.setBounds(0,0,gridTotalWidth,gridTotalHeight);
+
+		recToWorkWith.add(gridToWorkWith);
+
+		gridToWorkWith.setLayout(null);
+
+
+		int consX;
+		int consY;
+
+		// Add Labels for Rows & Cols
+
+		for(int i=0;i<numRowInGrid;i++)
+		{
+			consX = gridLeftX-gridSquareWidth;
+			consY = gridTopY+(i*gridSquareHeight);
+
+			rowLabels[i] = new OurRowColLabel(HouseType.Row,i);
+			rowLabels[i].setOpaque(false);
+			rowLabels[i].setBounds(consX,consY,gridSquareWidth,gridSquareHeight);
+			add(rowLabels[i]);
+		}
+
+		for(int j=0;j<numColInGrid;j++)
+		{
+			consX = gridLeftX+(j*gridSquareWidth);
+			consY = gridTopY-gridSquareHeight;
+
+			colLabels[j] = new OurRowColLabel(HouseType.Col,j);
+			colLabels[j].setOpaque(false);
+			colLabels[j].setBounds(consX,consY,gridSquareWidth,gridSquareHeight);
+			add(colLabels[j]);
+		}
+
+
+		// Add Objects To Accept & Display Numbers
+
+		for(int i=0;i<numRowInGrid;i++)
+		{
+			for(int j=0;j<numColInGrid;j++)
+			{
+				consX = j*gridSquareWidth;
+				consY = i*gridSquareHeight;
+
+				fillInMap[i][j] = new OurNumHolder(i,j);
+				fillInMap[i][j].setOpaque(false);
+				fillInMap[i][j].setBounds(consX,consY,gridSquareWidth,gridSquareHeight);
+				gridToWorkWith.add(fillInMap[i][j]);
+			}
+		}
+
+
+		// This just makes it so hitting spacebar does nothing
+
+		InputMap im = (InputMap)UIManager.get("Button.focusInputMap");
+		im.put(KeyStroke.getKeyStroke("pressed SPACE"), "none");
+		im.put(KeyStroke.getKeyStroke("released SPACE"), "none");
 
 
 		// Ensure user control is allowed at start
@@ -737,29 +897,12 @@ public class DrawNumsConstructor extends PaintedObjects
 		itsTheSaveSudokuButton.setEnabled(true);
 
 
-		// This just makes it so that hitting spacebar doesn't click the button
-
-		InputMap im = (InputMap)UIManager.get("Button.focusInputMap");
-		im.put(KeyStroke.getKeyStroke("pressed SPACE"), "none");
-		im.put(KeyStroke.getKeyStroke("released SPACE"), "none");
-
-
-
-// ~~~~~~~~~~~~~~~~~~~~
-
-		// Finally, the object at the start of that parent/child
-		// chain is added to the JFrame
-
-		add(recToWorkWith);
-
-// ~~~~~~~~~~~~~~~~~~~~
-
 		// Last bit of JFrame setup
 
 		getContentPane().setBackground( new Color(255,225,225) );
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setSize(890,800);
+		setSize(1200,800);
 		setVisible(true);
 	}
 

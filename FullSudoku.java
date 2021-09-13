@@ -8,13 +8,13 @@ public class FullSudoku
 
 	public String[][] forNumsUseFill;
 
-	protected int squaresSolved = 0;
+	public int squaresSolved = 0;
 
 	protected int initialInputSquares = 0;
 
-	public final int numRowCol = 9;
+	private final int widthAndHeight = 9;
 
-	protected BoxTranslator theUnboxer = new BoxTranslator();
+	public BoxTranslator theUnboxer = new BoxTranslator();
 
 	private boolean impossiblePuzzle = false;
 

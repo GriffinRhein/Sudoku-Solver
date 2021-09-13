@@ -1,3 +1,5 @@
+// Utilized by UsingLogicalMethods
+
 public class XY_Wing
 {
 	// Note that in an XY Wing, all three cells involved must contain EXACTLY

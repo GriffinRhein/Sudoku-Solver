@@ -1,3 +1,5 @@
+// Utilized by UsingLogicalMethods
+
 public class NakedPairsTripsQuads
 {
 	private FullSudoku mySudoku;

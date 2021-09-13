@@ -1,3 +1,5 @@
+// Utilized by UsingLogicalMethods
+
 public class PointingPairsTriples
 {
 	// Go through each of the 9 boxes, and determine whether any (unsolved) number

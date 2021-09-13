@@ -46,7 +46,6 @@ public class UsingLogicalMethods
 	int amountOfSolveMethods;
 
 
-
 	// Called by DrawNumsConstructor
 
 	public UsingLogicalMethods(FullSudoku inwardPuzzle)
@@ -95,49 +94,11 @@ public class UsingLogicalMethods
 											SolveMethod.XY_Wing};
 
 		amountOfSolveMethods = 14;
-/*
-		System.out.println("");
-		System.out.println("");
-		System.out.println("NEW PUZZLE YEAH");
-		System.out.println("");
-		System.out.println("");
-*/
+
 	} // Constructor
 
 
-	// Until the detailed messages are added to
-	// the GUI, this will be used to output them
-/*
-	private void tempPrinter(String a)
-	{
-		System.out.println("~~~~~~~~~~");
-		System.out.println("");
-		System.out.println(a);
-		System.out.println("");
-		System.out.println("~~~~~~~~~~");
-	}
-*/
-
-	public void solveAllAtOnce()
-	{
-		boolean keepGoing;
-
-		// At the start of solveOneStep(), somethingChanged is set to false,
-		// and becomes true if one solving method accomplishes something.
-
-		// So, every time something improves, this loop
-		// is guaranteed to run at least one more time.
-
-		do
-		{
-			keepGoing = solveOneStep();
-
-		} while(keepGoing);
-
-	} // solveAllAtOnce()
-
-
-	public boolean solveOneStep()
+	public String solveOneStep()
 	{
 		// Every time this function is called, somethingChanged is set to false, and
 		// it will remain that way until a solving method makes progress.
@@ -149,6 +110,8 @@ public class UsingLogicalMethods
 
 		int methodCounter = 0;
 
+		String stepDescription = null;
+
 
 		while((!(somethingChanged)) && methodCounter < amountOfSolveMethods)
 		{
@@ -158,14 +121,14 @@ public class UsingLogicalMethods
 
 
 			// If it made progress, get explanation of what happens
-/*
+
 			if(somethingChanged)
 			{
-				// Retrieve (and, for now, print) the relevant String
+				// Retrieve the relevant String. This is the only spot where stepDescription can change.
 
-				tempPrinter(stringPrint.getStepOutput(useForString[methodCounter]));
+				stepDescription = stringPrint.getStepOutput(useForString[methodCounter]);
 			}
-*/
+
 
 			// Increment methodCounter, moving on to the next solving method
 
@@ -173,7 +136,7 @@ public class UsingLogicalMethods
 		}
 
 
-		return somethingChanged;
+		return stepDescription;
 
 	} // solveOneStep()
 

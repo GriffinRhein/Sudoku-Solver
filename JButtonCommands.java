@@ -12,8 +12,10 @@ public class JButtonCommands
 
 	public void resetEverything()
 	{
-		theHub.textToWorkWith.resetSolveText();
-		theHub.textToWorkWith.repaint();
+		theHub.itsTheTextArea.setText("");
+
+		theHub.completeBanner.resetSolveText();
+		theHub.completeBanner.repaint();
 
 		for(int i=0;i<9;i++)
 		{
@@ -27,23 +29,26 @@ public class JButtonCommands
 		theHub.currentRow = 0;
 		theHub.currentCol = 0;
 
-		theHub.ourRecLocation.x = 100;
-		theHub.ourRecLocation.y = 100;
+		theHub.ourRecLocation.x = 0;
+		theHub.ourRecLocation.y = 0;
 
-		theHub.ourRectWidth = 60;
-		theHub.ourRectHeight = 60;
+		theHub.ourRectWidth = theHub.gridSquareWidth;
+		theHub.ourRectHeight = theHub.gridSquareHeight;
 
 		theHub.recToWorkWith.repaint();
 
 		if(!(theHub.controlsOn))
 			theHub.turnControlsOn();
-	}
+
+	} // resetEverything()
 
 
 	public void revertToUserInput()
 	{
-		theHub.textToWorkWith.resetSolveText();
-		theHub.textToWorkWith.repaint();
+		theHub.itsTheTextArea.setText("");
+
+		theHub.completeBanner.resetSolveText();
+		theHub.completeBanner.repaint();
 
 		for(int i=0;i<9;i++)
 		{
@@ -57,14 +62,15 @@ public class JButtonCommands
 			}
 		}
 
-		theHub.ourRectWidth = 60;
-		theHub.ourRectHeight = 60;
+		theHub.ourRectWidth = theHub.gridSquareWidth;
+		theHub.ourRectHeight = theHub.gridSquareHeight;
 
 		theHub.recToWorkWith.repaint();
 
 		if(!(theHub.controlsOn))
 			theHub.turnControlsOn();
-	}
+
+	} // revertToUserInput()
 
 
 	public String savingSudoku()
@@ -117,7 +123,7 @@ public class JButtonCommands
 
 		return builtString.toString();
 
-	}
+	} // savingSudoku()
 
 
 	public int loadingSudoku(String theString)
@@ -226,6 +232,6 @@ public class JButtonCommands
 
 		return 0;
 
-	}
+	} // loadingSudoku()
 
-}
+} // JButtonCommands class
