@@ -50,9 +50,17 @@ public class UsingLogicalMethods
 
 	public UsingLogicalMethods(FullSudoku inwardPuzzle)
 	{
+		// Sudoku itself
+
 		mySudoku = inwardPuzzle;
 
+
+		// Used to create Strings describing what just happened
+
 		stringPrint = new MethodExplanations(this);
+
+
+		// 
 
 		trickHS = new HiddenSingle(mySudoku,stringPrint);
 		trickPPT = new PointingPairsTriples(mySudoku,stringPrint);
@@ -135,6 +143,8 @@ public class UsingLogicalMethods
 			methodCounter++;
 		}
 
+
+		// Returns null if nothing changed. Otherwise, it returns the explanation String
 
 		return stepDescription;
 

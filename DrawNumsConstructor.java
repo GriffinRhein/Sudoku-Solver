@@ -132,13 +132,13 @@ public class DrawNumsConstructor extends PaintedObjects
 
 	// Mapping Shortcuts
 
-	protected void setTheAction(KeyStroke a, String b, Action c)
+	private void setTheAction(KeyStroke a, String b, Action c)
 	{
 		inputMap.put(a,b);
 		actionMap.put(b,c);
 	}
 
-	protected class NumAction extends AbstractAction
+	public class NumAction extends AbstractAction
 	{
 		Integer numToHandle;
 
@@ -161,15 +161,21 @@ public class DrawNumsConstructor extends PaintedObjects
 		}
 	}
 
-	protected void setNumAction(KeyStroke a, String b, NumAction c)
+	private void setNumAction(KeyStroke a, String b, NumAction c)
 	{
 		inputMap.put(a,b);
 		actionMap.put(b,c);
 	}
 
-	protected enum direcList{Right,Left,Up,Down}
+	private enum direcList
+	{
+		Right,
+		Left,
+		Up,
+		Down;
+	}
 
-	protected class DirecAction extends AbstractAction
+	public class DirecAction extends AbstractAction
 	{
 		direcList theDirection;
 
@@ -245,7 +251,7 @@ public class DrawNumsConstructor extends PaintedObjects
 		}
 	}
 
-	protected void setDirecAction(KeyStroke a, String b, DirecAction c)
+	private void setDirecAction(KeyStroke a, String b, DirecAction c)
 	{
 		inputMap.put(a,b);
 		actionMap.put(b,c);
@@ -309,11 +315,20 @@ public class DrawNumsConstructor extends PaintedObjects
 		}
 	};
 
-	private void setStepsButton(int a)
+
+	private enum stepsButtonPurpose
+	{
+		StartSlowSolve,
+		ForwardOneStep,
+		GoToLastResort,
+		Nothing;
+	}
+
+	private void setStepsButton(stepsButtonPurpose a)
 	{
 		switch(a)
 		{
-			case 0:
+			case StartSlowSolve:
 
 			itsTheBeginStepsButton.setAction(slowSolveStartAction);
 			itsTheBeginStepsButton.setText("Step-By-Step Solve");
@@ -322,7 +337,7 @@ public class DrawNumsConstructor extends PaintedObjects
 			break;
 
 
-			case 1:
+			case ForwardOneStep:
 
 			itsTheBeginStepsButton.setAction(advanceStepAction);
 			itsTheBeginStepsButton.setText("Next Step");
@@ -331,7 +346,7 @@ public class DrawNumsConstructor extends PaintedObjects
 			break;
 
 
-			case 2:
+			case GoToLastResort:
 
 			itsTheBeginStepsButton.setAction(lastResortAction);
 			itsTheBeginStepsButton.setText("Last Resort");
@@ -340,7 +355,7 @@ public class DrawNumsConstructor extends PaintedObjects
 			break;
 
 
-			case 3:
+			case Nothing:
 
 			itsTheBeginStepsButton.setAction(nothingAction);
 			itsTheBeginStepsButton.setText("");
@@ -352,7 +367,7 @@ public class DrawNumsConstructor extends PaintedObjects
 
 	// Begin solving procedures
 
-	protected void finalAct(boolean allAtOnce)
+	private void finalAct(boolean allAtOnce)
 	{
 		// Put all Strings input by the user into a 9x9 array
 
@@ -429,13 +444,13 @@ public class DrawNumsConstructor extends PaintedObjects
 
 				if(allAtOnce)
 				{
-					setStepsButton(3);
+					setStepsButton(stepsButtonPurpose.Nothing);
 
 					oneBigSolve();
 				}
 				else
 				{
-					setStepsButton(1);
+					setStepsButton(stepsButtonPurpose.ForwardOneStep);
 
 					completeText = new StringBuilder(bundleInTilde("Puzzle Start!"));
 					updateCurrentStatus(0,true);
@@ -520,17 +535,17 @@ public class DrawNumsConstructor extends PaintedObjects
 
 		if(ourSentSudoku.squaresSolved == 81)
 		{
-			String appendNow = incomingText+"\n\n"+puzzleDoneMessage;
+			completeText.append(bundleInTilde(incomingText));
 
-			completeText.append(bundleInTilde(appendNow));
+			completeText.append(bundleInTilde(puzzleDoneMessage));
 
-			setStepsButton(3);
+			setStepsButton(stepsButtonPurpose.Nothing);
 		}
 		else if(incomingText == null)
 		{
 			completeText.append(bundleInTilde(noProgressMessage));
 
-			setStepsButton(2);
+			setStepsButton(stepsButtonPurpose.GoToLastResort);
 		}
 		else
 		{
@@ -614,7 +629,7 @@ public class DrawNumsConstructor extends PaintedObjects
 		{
 			completeText = new StringBuilder(bundleInTilde(lastResortMessage));
 
-			setStepsButton(3);
+			setStepsButton(stepsButtonPurpose.Nothing);
 		}
 
 		updateCurrentStatus(2,true);
@@ -668,7 +683,7 @@ public class DrawNumsConstructor extends PaintedObjects
 		itsTheUndoSolveButton.setEnabled(false);
 		itsTheLoadSudokuButton.setEnabled(true);
 
-		setStepsButton(0);
+		setStepsButton(stepsButtonPurpose.StartSlowSolve);
 
 		controlsOn = true;
 	}

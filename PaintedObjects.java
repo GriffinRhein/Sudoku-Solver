@@ -25,22 +25,22 @@ import javax.swing.SwingUtilities;
 
 public class PaintedObjects extends JFrame
 {
-	public final static int gridSquareWidth = 60;
-	public final static int numColInGrid = 9;
-	public final static int gridTotalWidth = gridSquareWidth*numColInGrid;
-	public final static int numColBetweenThick = 3;
+	protected final static int gridSquareWidth = 60;
+	protected final static int numColInGrid = 9;
+	protected final static int gridTotalWidth = gridSquareWidth*numColInGrid;
+	protected final static int numColBetweenThick = 3;
 
-	public final static int gridSquareHeight = 60;
-	public final static int numRowInGrid = 9;
-	public final static int gridTotalHeight = gridSquareHeight*numRowInGrid;
-	public final static int numRowBetweenThick = 3;
+	protected final static int gridSquareHeight = 60;
+	protected final static int numRowInGrid = 9;
+	protected final static int gridTotalHeight = gridSquareHeight*numRowInGrid;
+	protected final static int numRowBetweenThick = 3;
 
 
 	// CoreGrid object can paint itself
 
-	public class CoreGrid
+	private class CoreGrid
 	{
-		protected void paint(Graphics2D g2d)
+		private void paint(Graphics2D g2d)
 		{
 			BasicStroke thickerBorder = new BasicStroke(1.5F);
 			BasicStroke normalBorder = new BasicStroke(1F);
@@ -102,11 +102,11 @@ public class PaintedObjects extends JFrame
 
 	// OurCoreGrid can create a CoreGrid and call paint() on it
 
-	public class OurCoreGrid extends JPanel
+	protected class OurCoreGrid extends JPanel
 	{
 		private CoreGrid capableCoreGrid;
 
-		public OurCoreGrid()
+		protected OurCoreGrid()
 		{
 			capableCoreGrid = new CoreGrid();
 		}
@@ -130,20 +130,20 @@ public class PaintedObjects extends JFrame
 
 	private final static Color ourRectColor = new Color(28,222,144);
 
-	public static int ourRectWidth = gridSquareWidth;
-	public static int ourRectHeight = gridSquareHeight;
+	protected static int ourRectWidth = gridSquareWidth;
+	protected static int ourRectHeight = gridSquareHeight;
 
 
 	// Exact location of the highlight
 
-	public static Point ourRecLocation = new Point(0,0);
+	protected static Point ourRecLocation = new Point(0,0);
 
 
 	// Rectangle object can paint itself
 
-	public class Rectangle
+	private class Rectangle
 	{
-		protected void paint(Graphics2D g2d)
+		private void paint(Graphics2D g2d)
 		{
 			// The variables needed to draw the thing are provided above
 
@@ -156,11 +156,11 @@ public class PaintedObjects extends JFrame
 
 	// OurRectangle can create a Rectangle and call paint() on it
 
-	public class OurRectangle extends JPanel
+	protected class OurRectangle extends JPanel
 	{
 		private Rectangle capableRectangle;
 
-		public OurRectangle()
+		protected OurRectangle()
 		{
 			capableRectangle = new Rectangle();
 		}
@@ -180,34 +180,32 @@ public class PaintedObjects extends JFrame
 
 
 
-
-
 	// Create the fonts and the metrics
 
-	protected Color theBlack = new Color(0,0,0);
-	protected Color theRed = new Color(255,0,0);
-	protected Color theBlue = new Color(0,0,255);
-	protected Color thePurple = new Color(125,0,225);
+	private Color theBlack = new Color(0,0,0);
+	private Color theRed = new Color(255,0,0);
+	private Color theBlue = new Color(0,0,255);
+	private Color thePurple = new Color(125,0,225);
 
-	protected Font myFont = new Font("TimesRoman",Font.PLAIN,42);
-	protected Canvas c1 = new Canvas();
-	protected FontMetrics fm = c1.getFontMetrics(myFont);
+	private Font myFont = new Font("TimesRoman",Font.PLAIN,42);
+	private Canvas c1 = new Canvas();
+	private FontMetrics fm = c1.getFontMetrics(myFont);
 
-	protected Font smallerFont = new Font("TimesRoman",Font.PLAIN,28);
-	protected Canvas c2 = new Canvas();
-	protected FontMetrics smallerFM = c2.getFontMetrics(smallerFont);
+	private Font smallerFont = new Font("TimesRoman",Font.PLAIN,28);
+	private Canvas c2 = new Canvas();
+	private FontMetrics smallerFM = c2.getFontMetrics(smallerFont);
 
-	protected Font possArrayFont = new Font("TimesRoman",Font.PLAIN,18);
-	protected Canvas c3 = new Canvas();
-	protected FontMetrics possArrayFontFM = c3.getFontMetrics(possArrayFont);
+	private Font possArrayFont = new Font("TimesRoman",Font.PLAIN,18);
+	private Canvas c3 = new Canvas();
+	private FontMetrics possArrayFontFM = c3.getFontMetrics(possArrayFont);
 
 
 	// SolveText object can paint itself
 	// Currently NOT USED
 
-	public class SolveText
+	private class SolveText
 	{
-		protected Integer numSquaresSolved = null;
+		private Integer numSquaresSolved = null;
 
 		private String incompleteString = "";
 		private String completeString = "Puzzle is complete!";
@@ -216,13 +214,13 @@ public class PaintedObjects extends JFrame
 		private int shownMessY = (100+(100-60))/2 - smallerFM.getHeight()/2 + smallerFM.getAscent();
 		private int shownMessX;
 
-		protected void resetThisAll()
+		private void resetThisAll()
 		{
 			numSquaresSolved = null;
 			shownMessage = incompleteString;
 		}
 
-		protected void paint(Graphics2D g2d)
+		private void paint(Graphics2D g2d)
 		{
 			g2d.setColor(theBlue);
 			g2d.setFont(smallerFont);
@@ -240,21 +238,21 @@ public class PaintedObjects extends JFrame
 	// OurSolveText can create a SolveText and call paint() on it
 	// Currently NOT USED
 
-	public class OurSolveText extends JPanel
+	protected class OurSolveText extends JPanel
 	{
 		private SolveText capableSolveText;
 
-		public OurSolveText()
+		protected OurSolveText()
 		{
 			capableSolveText = new SolveText();
 		}
 
-		public void setNumSquaresSolved(int theInput)
+		protected void setNumSquaresSolved(int theInput)
 		{
 			capableSolveText.numSquaresSolved = theInput;
 		}
 
-		public void resetSolveText()
+		protected void resetSolveText()
 		{
 			capableSolveText.resetThisAll();
 		}
@@ -275,7 +273,7 @@ public class PaintedObjects extends JFrame
 
 	// RowColLabel object can paint itself
 
-	public class RowColLabel
+	private class RowColLabel
 	{
 		private String labelString;
 
@@ -285,7 +283,7 @@ public class PaintedObjects extends JFrame
 		private int locY = gridSquareHeight/2 - possArrayFontFM.getHeight()/2 + possArrayFontFM.getAscent();
 		private int locX;
 
-		public RowColLabel(HouseType a, int b)
+		private RowColLabel(HouseType a, int b)
 		{
 			rowOrCol = a;
 			whichRowCol = b;
@@ -294,7 +292,7 @@ public class PaintedObjects extends JFrame
 			locX = gridSquareWidth/2 - possArrayFontFM.stringWidth(labelString)/2;
 		}
 
-		protected void paint(Graphics2D g2d)
+		private void paint(Graphics2D g2d)
 		{
 			g2d.setColor(theBlack);
 			g2d.setFont(possArrayFont);
@@ -307,11 +305,11 @@ public class PaintedObjects extends JFrame
 
 	// OurRowColLabel can create a RowColLabel and call paint() on it
 
-	public class OurRowColLabel extends JPanel
+	protected class OurRowColLabel extends JPanel
 	{
 		private RowColLabel capableRowColLabel;
 
-		public OurRowColLabel(HouseType a, int b)
+		protected OurRowColLabel(HouseType a, int b)
 		{
 			capableRowColLabel = new RowColLabel(a,b);
 		}
@@ -332,32 +330,32 @@ public class PaintedObjects extends JFrame
 
 	// NumHolder object can paint itself
 
-	public class NumHolder
+	private class NumHolder
 	{
-		protected String numHeld;
-		protected String[] endPossArray;
+		private String numHeld;
+		private String[] endPossArray;
 
-		protected int ownRow;
-		protected int ownCol;
+		private int ownRow;
+		private int ownCol;
 
-		protected int pracY = gridSquareHeight/2 - fm.getHeight()/2 + fm.getAscent();
-		protected int pracX;
+		private int pracY = gridSquareHeight/2 - fm.getHeight()/2 + fm.getAscent();
+		private int pracX;
 
-		protected int possArrayPracY;
-		protected int possArrayPracX;
+		private int possArrayPracY;
+		private int possArrayPracX;
 
-		protected boolean addedOnHumanSolve = false;
-		protected boolean addedOnLastResort = false;
+		private boolean addedOnHumanSolve = false;
+		private boolean addedOnLastResort = false;
 
-		protected boolean didSquareStartEmpty = true;
+		private boolean didSquareStartEmpty = true;
 
-		protected int[] howFarY = new int[]{0,0,0,20,20,20,40,40,40};
-		protected int[] howFarX = new int[]{0,20,40,0,20,40,0,20,40};
+		private int[] howFarY = new int[]{0,0,0,20,20,20,40,40,40};
+		private int[] howFarX = new int[]{0,20,40,0,20,40,0,20,40};
 
 
 		// Constructor
 
-		protected NumHolder(int selfRow, int selfCol)
+		private NumHolder(int selfRow, int selfCol)
 		{
 			// Initialize numHeld to a blank
 
@@ -373,7 +371,7 @@ public class PaintedObjects extends JFrame
 			ownCol = selfCol;
 		}
 
-		protected void resetItAll()
+		private void resetItAll()
 		{
 			numHeld = "";
 			for(int s=0;s<9;s++)
@@ -385,7 +383,7 @@ public class PaintedObjects extends JFrame
 			didSquareStartEmpty = true;
 		}
 
-		protected void paint(Graphics2D g2d)
+		private void paint(Graphics2D g2d)
 		{
 			// Set the color and font, then use own variables to
 			// paint the correct number at the correct location
@@ -445,11 +443,11 @@ public class PaintedObjects extends JFrame
 
 	// OurNumHolder can create a NumHolder and call paint() on it
 
-	public class OurNumHolder extends JPanel
+	protected class OurNumHolder extends JPanel
 	{
 		private NumHolder capableNumHolder;
 
-		public OurNumHolder(int i, int j)
+		protected OurNumHolder(int i, int j)
 		{
 			capableNumHolder = new NumHolder(i, j);
 		}

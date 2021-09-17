@@ -334,7 +334,7 @@ public class FullSudoku
 	} // NakedSingle()
 
 
-	// Constructor!
+	// Constructor! Called by finalAct() in DrawNumsConstructor
 
 	public FullSudoku(String[][] thisInput)
 	{
