@@ -12,7 +12,7 @@ public class ClaimingPairsTriples
 	private FullSudoku mySudoku;
 	private MethodExplanations myMethods;
 
-	public ClaimingPairsTriples(FullSudoku theSudoku, MethodExplanations theMethods)
+	ClaimingPairsTriples(FullSudoku theSudoku, MethodExplanations theMethods)
 	{
 		mySudoku = theSudoku;
 		myMethods = theMethods;
@@ -55,7 +55,7 @@ public class ClaimingPairsTriples
 	// Function that starts it all. Runs the procedure on
 	// each of the nine rows and each of the nine columns
 
-	public boolean ClaimingPairsTriples()
+	boolean ClaimingPairsTriples()
 	{
 		didWeGetOne = false;
 

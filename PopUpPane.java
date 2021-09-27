@@ -9,7 +9,7 @@ public class PopUpPane
 
 	// Constructor
 
-	public PopUpPane(DrawNumsConstructor a)
+	PopUpPane(DrawNumsConstructor a)
 	{
 		parentFrame = a;
 	}
@@ -17,7 +17,7 @@ public class PopUpPane
 
 	// Gives the string for the Sudoku currently entered
 
-	public void outputTheString(String theString)
+	void outputTheString(String theString)
 	{
 		JOptionPane theWindow = new JOptionPane();
 
@@ -33,7 +33,7 @@ public class PopUpPane
 
 	// Allows user to input a string to quickly enter a Sudoku
 
-	public String getString()
+	String getString()
 	{
 		JOptionPane theWindow = new JOptionPane();
 
@@ -43,7 +43,7 @@ public class PopUpPane
 	}
 
 
-	public void showInsertedDupeMessage()
+	void showInsertedDupeMessage()
 	{
 		JOptionPane theWindow = new JOptionPane();
 
@@ -53,7 +53,7 @@ public class PopUpPane
 	}
 
 
-	public void showNotEnoughCluesMessage()
+	void showNotEnoughCluesMessage()
 	{
 		JOptionPane theWindow = new JOptionPane();
 
@@ -63,7 +63,7 @@ public class PopUpPane
 	}
 
 
-	public void showNoSolutionMessage()
+	void showNoSolutionMessage()
 	{
 		JOptionPane theWindow = new JOptionPane();
 
@@ -72,7 +72,7 @@ public class PopUpPane
 		theWindow.showMessageDialog(parentFrame,noSolutionMessage,"Solve Error",JOptionPane.ERROR_MESSAGE);
 	}
 
-	public void showItBrokeMessage()
+	void showItBrokeMessage()
 	{
 		JOptionPane theWindow = new JOptionPane();
 
@@ -84,7 +84,7 @@ public class PopUpPane
 
 	// Error message for invalid String
 
-	public void showErrorMessage(int errorCode)
+	void showErrorMessage(int errorCode)
 	{
 		JOptionPane theWindow = new JOptionPane();
 

@@ -19,7 +19,7 @@ public class HiddenSingle
 	private FullSudoku mySudoku;
 	private MethodExplanations myMethods;
 
-	public HiddenSingle(FullSudoku theSudoku, MethodExplanations theMethods)
+	HiddenSingle(FullSudoku theSudoku, MethodExplanations theMethods)
 	{
 		mySudoku = theSudoku;
 		myMethods = theMethods;
@@ -42,7 +42,7 @@ public class HiddenSingle
 
 	// Hidden Single Implementation
 
-	public boolean HiddenSingle()
+	boolean HiddenSingle()
 	{
 		didWeGetOne = false;
 

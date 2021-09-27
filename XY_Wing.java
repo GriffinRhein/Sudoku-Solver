@@ -8,7 +8,7 @@ public class XY_Wing
 	private FullSudoku mySudoku;
 	private MethodExplanations myMethods;
 
-	public XY_Wing(FullSudoku theSudoku, MethodExplanations theMethods)
+	XY_Wing(FullSudoku theSudoku, MethodExplanations theMethods)
 	{
 		mySudoku = theSudoku;
 		myMethods = theMethods;
@@ -44,7 +44,7 @@ public class XY_Wing
 	// down to exactly two possibilities may serve as a pivot, so for each square
 	// which fulfills that criteria, move on to the next step with it as the pivot
 
-	public boolean XY_Wing()
+	boolean XY_Wing()
 	{
 		didWeGetOne = false;
 

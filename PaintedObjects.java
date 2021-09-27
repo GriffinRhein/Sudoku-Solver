@@ -1,62 +1,292 @@
 import java.awt.BasicStroke;
-import java.awt.BorderLayout;
 import java.awt.Canvas;
 import java.awt.Color;
-import java.awt.EventQueue;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Stroke;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.ActionMap;
-import javax.swing.InputMap;
-import javax.swing.KeyStroke;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
-
 
 public class PaintedObjects extends JFrame
 {
-	protected final static int gridSquareWidth = 60;
-	protected final static int numColInGrid = 9;
-	protected final static int gridTotalWidth = gridSquareWidth*numColInGrid;
-	protected final static int numColBetweenThick = 3;
+	// Sudoku Grid Info
 
-	protected final static int gridSquareHeight = 60;
-	protected final static int numRowInGrid = 9;
-	protected final static int gridTotalHeight = gridSquareHeight*numRowInGrid;
-	protected final static int numRowBetweenThick = 3;
+	final int numColInGrid = 9;
+	final int numColBetweenThick = 3;
+
+	final int numRowInGrid = 9;
+	final int numRowBetweenThick = 3;
 
 
-	// CoreGrid object can paint itself
+	// Current row & column we are highlighting
 
-	private class CoreGrid
+	int currentCol = 0;
+	int currentRow = 0;
+
+
+	// Influenced by size of JFrame
+
+	int sudokuBackdropWidth;
+	int sudokuBackdropHeight;
+
+	int gridSquareWidth;
+	int gridTotalWidth;
+
+	int gridSquareHeight;
+	int gridTotalHeight;
+
+	Dimension standardButtonSize;
+	Dimension solveButtonSize;
+	Dimension emptySizeBlock;
+
+
+	// ~~~~~~~~~~
+	// ~~~~~~~~~~
+	// ~~~~~~~~~~
+
+
+	class SudokuBackdrop extends JPanel
 	{
-		private void paint(Graphics2D g2d)
+		void applySizeValues()
 		{
+			sudokuBackdropWidth = this.getWidth();
+			sudokuBackdropHeight = this.getHeight();
+
+			gridSquareWidth = sudokuBackdropWidth/(numColInGrid+1);
+			gridSquareHeight = sudokuBackdropHeight/(numRowInGrid+1);
+
+			gridTotalWidth = sudokuBackdropWidth-gridSquareWidth;
+			gridTotalHeight = sudokuBackdropHeight-gridSquareHeight;
+
+			standardButtonSize = new Dimension(gridSquareWidth*2,gridSquareHeight/2);
+			solveButtonSize = new Dimension(gridSquareWidth*3,(gridSquareHeight/2)+20);
+			emptySizeBlock = new Dimension(gridSquareWidth*3,(gridSquareHeight/2)-10);
+		}
+
+	} // SudokuBackdrop class
+
+	SudokuBackdrop sudokuGridBackdrop = new SudokuBackdrop();
+
+
+	// ~~~~~~~~~~
+	// ~~~~~~~~~~
+	// ~~~~~~~~~~
+
+
+	class ColLabels extends JPanel
+	{
+		@Override
+		protected void paintComponent(Graphics g)
+		{
+			super.paintComponent(g);
+			Graphics2D g2d = (Graphics2D)g.create();
+
+			// ~~~~~~~~~~
+
+			g2d.setColor(theBlack);
+			g2d.setFont(possArrayFont);
+
+			int locY = gridSquareHeight/2 - possArrayFontFM.getHeight()/2 + possArrayFontFM.getAscent();
+			int locX;
+
+			String toWrite;
+
+			for(int i=1;i<numColInGrid+1;i++)
+			{
+				toWrite = Integer.toString(i);
+
+				locX = ((2*i+1)*(gridSquareWidth))/2 - possArrayFontFM.stringWidth(toWrite)/2;
+
+				g2d.drawString(toWrite,locX,locY);
+			}
+
+			// ~~~~~~~~~~
+
+			g2d.dispose();
+		}
+
+	} // ColLabels Class
+
+	ColLabels colLabelsToWorkWith = new ColLabels();
+
+
+	// ~~~~~~~~~~
+	// ~~~~~~~~~~
+	// ~~~~~~~~~~
+
+
+	class RowLabels extends JPanel
+	{
+		@Override
+		protected void paintComponent(Graphics g)
+		{
+			super.paintComponent(g);
+			Graphics2D g2d = (Graphics2D)g.create();
+
+			// ~~~~~~~~~~
+
+			g2d.setColor(theBlack);
+			g2d.setFont(possArrayFont);
+
+			int locY;
+			int locX;
+
+			String toWrite;
+
+			for(int i=0;i<numColInGrid;i++)
+			{
+				toWrite = Integer.toString(i+1);
+
+				locY = ((2*i+1)*(gridSquareHeight))/2 - possArrayFontFM.getHeight()/2 + possArrayFontFM.getAscent();
+				locX = gridSquareWidth/2 - possArrayFontFM.stringWidth(toWrite)/2;
+
+				g2d.drawString(toWrite,locX,locY);
+			}
+
+			// ~~~~~~~~~~
+
+			g2d.dispose();
+		}
+
+	} // RowLabels class
+
+	RowLabels rowLabelsToWorkWith = new RowLabels();
+
+
+	// ~~~~~~~~~~
+	// ~~~~~~~~~~
+	// ~~~~~~~~~~
+
+
+	class RecHighlight extends JPanel
+	{
+		private Color ourRectColor = new Color(28,222,144);
+		private boolean showIt = true;
+
+		void setDrawStatus(boolean a)
+		{
+			showIt = a;
+		}
+
+		@Override
+		protected void paintComponent(Graphics g)
+		{
+			super.paintComponent(g);
+			Graphics2D g2d = (Graphics2D)g.create();
+
+			// ~~~~~~~~~~
+
+			int whereX = currentCol*gridSquareWidth;
+			int whereY = currentRow*gridSquareHeight;
+
+			g2d.setColor(ourRectColor);
+
+			if(showIt)
+			{ g2d.fillRect(whereX,whereY,gridSquareWidth,gridSquareHeight); }
+			else
+			{ g2d.fillRect(whereX,whereY,0,0); }
+
+			// ~~~~~~~~~~
+
+			g2d.dispose();
+		}
+
+	} // RecHighlight class
+
+	RecHighlight recToWorkWith = new RecHighlight();
+
+
+	// ~~~~~~~~~~
+	// ~~~~~~~~~~
+	// ~~~~~~~~~~
+
+
+	Action rightAction = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			if(currentCol != numColInGrid-1)
+			{ currentCol++; }
+			else
+			{ currentCol = 0; }
+
+			recToWorkWith.repaint();
+		}
+	};
+
+	Action leftAction = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			if(currentCol != 0)
+			{ currentCol--; }
+			else
+			{ currentCol = numColInGrid-1; }
+
+			recToWorkWith.repaint();
+		}
+	};
+
+	Action downAction = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			if(currentRow != numRowInGrid-1)
+			{ currentRow++; }
+			else
+			{ currentRow = 0; }
+
+			recToWorkWith.repaint();
+		}
+	};
+
+	Action upAction = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			if(currentRow != 0)
+			{ currentRow--; }
+			else
+			{ currentRow = numRowInGrid-1; }
+
+			recToWorkWith.repaint();
+		}
+	};
+
+
+	// ~~~~~~~~~~
+	// ~~~~~~~~~~
+	// ~~~~~~~~~~
+
+
+	class GridLines extends JPanel
+	{
+		@Override
+		protected void paintComponent(Graphics g)
+		{
+			super.paintComponent(g);
+			Graphics2D g2d = (Graphics2D)g.create();
+
+			// ~~~~~~~~~~
+
+
 			BasicStroke thickerBorder = new BasicStroke(1.5F);
 			BasicStroke normalBorder = new BasicStroke(1F);
-
-			int rightX = gridSquareWidth*numColInGrid;
-			int bottomY = gridSquareHeight*numRowInGrid;
-
-			int handyCoord;
-
-			// Set color to black and the line to normal thickness
-			// When drawing, if the line you draw is line 0, 3, 6,or 9,
-			// then use the thicker border for that line only
 
 			g2d.setColor(new Color(0,0,0));
 			g2d.setStroke(normalBorder);
 
+
+			int handyCoord;
 
 			// Draw Vertical Lines
 
@@ -76,7 +306,6 @@ public class PaintedObjects extends JFrame
 				}
 			}
 
-
 			// Draw Horizontal Lines
 
 			for(int j=0;j<=numRowInGrid;j++)
@@ -95,92 +324,21 @@ public class PaintedObjects extends JFrame
 				}
 			}
 
-		}
 
-	} // CoreGrid class
-
-
-	// OurCoreGrid can create a CoreGrid and call paint() on it
-
-	protected class OurCoreGrid extends JPanel
-	{
-		private CoreGrid capableCoreGrid;
-
-		protected OurCoreGrid()
-		{
-			capableCoreGrid = new CoreGrid();
-		}
-
-		@Override
-		protected void paintComponent(Graphics g)
-		{
-			super.paintComponent(g);
-			Graphics2D g2d = (Graphics2D)g.create();
-
-			capableCoreGrid.paint(g2d);
+			// ~~~~~~~~~~
 
 			g2d.dispose();
 		}
 
-	} // OurCoreGrid class
+	} // GridLines class
+
+	GridLines gridToWorkWith = new GridLines();
 
 
+	// ~~~~~~~~~~
+	// ~~~~~~~~~~
+	// ~~~~~~~~~~
 
-	// Color and size of the highlight
-
-	private final static Color ourRectColor = new Color(28,222,144);
-
-	protected static int ourRectWidth = gridSquareWidth;
-	protected static int ourRectHeight = gridSquareHeight;
-
-
-	// Exact location of the highlight
-
-	protected static Point ourRecLocation = new Point(0,0);
-
-
-	// Rectangle object can paint itself
-
-	private class Rectangle
-	{
-		private void paint(Graphics2D g2d)
-		{
-			// The variables needed to draw the thing are provided above
-
-			g2d.setColor(ourRectColor);
-			g2d.fillRect(ourRecLocation.x, ourRecLocation.y, ourRectWidth, ourRectHeight);
-		}
-
-	} // Rectangle class
-
-
-	// OurRectangle can create a Rectangle and call paint() on it
-
-	protected class OurRectangle extends JPanel
-	{
-		private Rectangle capableRectangle;
-
-		protected OurRectangle()
-		{
-			capableRectangle = new Rectangle();
-		}
-
-		@Override
-		protected void paintComponent(Graphics g)
-		{
-			super.paintComponent(g);
-			Graphics2D g2d = (Graphics2D)g.create();
-
-			capableRectangle.paint(g2d);
-
-			g2d.dispose();
-		}
-
-	} // OurRectangle class
-
-
-
-	// Create the fonts and the metrics
 
 	private Color theBlack = new Color(0,0,0);
 	private Color theRed = new Color(255,0,0);
@@ -200,137 +358,12 @@ public class PaintedObjects extends JFrame
 	private FontMetrics possArrayFontFM = c3.getFontMetrics(possArrayFont);
 
 
-	// SolveText object can paint itself
-	// Currently NOT USED
-
-	private class SolveText
-	{
-		private Integer numSquaresSolved = null;
-
-		private String incompleteString = "";
-		private String completeString = "Puzzle is complete!";
-
-		private String shownMessage = incompleteString;
-		private int shownMessY = (100+(100-60))/2 - smallerFM.getHeight()/2 + smallerFM.getAscent();
-		private int shownMessX;
-
-		private void resetThisAll()
-		{
-			numSquaresSolved = null;
-			shownMessage = incompleteString;
-		}
-
-		private void paint(Graphics2D g2d)
-		{
-			g2d.setColor(theBlue);
-			g2d.setFont(smallerFont);
-
-			if(numSquaresSolved != null && numSquaresSolved.equals(81))
-					shownMessage = completeString;
-
-			shownMessX = (100+640)/2 - smallerFM.stringWidth(shownMessage)/2;
-			g2d.drawString(shownMessage,shownMessX,shownMessY);
-		}
-
-	} // SolveText class
+	// ~~~~~~~~~~
+	// ~~~~~~~~~~
+	// ~~~~~~~~~~
 
 
-	// OurSolveText can create a SolveText and call paint() on it
-	// Currently NOT USED
-
-	protected class OurSolveText extends JPanel
-	{
-		private SolveText capableSolveText;
-
-		protected OurSolveText()
-		{
-			capableSolveText = new SolveText();
-		}
-
-		protected void setNumSquaresSolved(int theInput)
-		{
-			capableSolveText.numSquaresSolved = theInput;
-		}
-
-		protected void resetSolveText()
-		{
-			capableSolveText.resetThisAll();
-		}
-
-		@Override
-		protected void paintComponent(Graphics g)
-		{
-			super.paintComponent(g);
-			Graphics2D g2d = (Graphics2D)g.create();
-
-			capableSolveText.paint(g2d);
-
-			g2d.dispose();
-		}
-
-	} // OurSolveText class
-
-
-	// RowColLabel object can paint itself
-
-	private class RowColLabel
-	{
-		private String labelString;
-
-		private HouseType rowOrCol;
-		private int whichRowCol;
-
-		private int locY = gridSquareHeight/2 - possArrayFontFM.getHeight()/2 + possArrayFontFM.getAscent();
-		private int locX;
-
-		private RowColLabel(HouseType a, int b)
-		{
-			rowOrCol = a;
-			whichRowCol = b;
-
-			labelString = Integer.toString(whichRowCol+1);
-			locX = gridSquareWidth/2 - possArrayFontFM.stringWidth(labelString)/2;
-		}
-
-		private void paint(Graphics2D g2d)
-		{
-			g2d.setColor(theBlack);
-			g2d.setFont(possArrayFont);
-
-			g2d.drawString(labelString,locX,locY);
-		}
-
-	} // RowColLabel Class
-
-
-	// OurRowColLabel can create a RowColLabel and call paint() on it
-
-	protected class OurRowColLabel extends JPanel
-	{
-		private RowColLabel capableRowColLabel;
-
-		protected OurRowColLabel(HouseType a, int b)
-		{
-			capableRowColLabel = new RowColLabel(a,b);
-		}
-
-		@Override
-		protected void paintComponent(Graphics g)
-		{
-			super.paintComponent(g);
-			Graphics2D g2d = (Graphics2D)g.create();
-
-			capableRowColLabel.paint(g2d);
-
-			g2d.dispose();
-		}
-
-	} // OurRowColLabel class
-
-
-	// NumHolder object can paint itself
-
-	private class NumHolder
+	class NumHolder extends JPanel
 	{
 		private String numHeld;
 		private String[] endPossArray;
@@ -338,24 +371,25 @@ public class PaintedObjects extends JFrame
 		private int ownRow;
 		private int ownCol;
 
+		private int[] howFarY;
+		private int[] howFarX;
+
 		private int pracY = gridSquareHeight/2 - fm.getHeight()/2 + fm.getAscent();
 		private int pracX;
 
 		private int possArrayPracY;
 		private int possArrayPracX;
 
-		private boolean addedOnHumanSolve = false;
-		private boolean addedOnLastResort = false;
 
-		private boolean didSquareStartEmpty = true;
+		boolean addedOnHumanSolve = false;
+		boolean addedOnLastResort = false;
 
-		private int[] howFarY = new int[]{0,0,0,20,20,20,40,40,40};
-		private int[] howFarX = new int[]{0,20,40,0,20,40,0,20,40};
+		boolean didSquareStartEmpty = true;
 
 
 		// Constructor
 
-		private NumHolder(int selfRow, int selfCol)
+		NumHolder(int selfRow, int selfCol)
 		{
 			// Initialize numHeld to a blank
 
@@ -365,13 +399,18 @@ public class PaintedObjects extends JFrame
 
 			endPossArray = new String[]{"","","","","","","","",""};
 
-			// Fix own row and column
+			// Initialize own row and column
 
 			ownRow = selfRow;
 			ownCol = selfCol;
+
+			// Initialize info to display remaining possibilities
+
+			howFarY = new int[]{0,0,0,20,20,20,40,40,40};
+			howFarX = new int[]{0,20,40,0,20,40,0,20,40};
 		}
 
-		private void resetItAll()
+		void resetItAll()
 		{
 			numHeld = "";
 			for(int s=0;s<9;s++)
@@ -383,8 +422,43 @@ public class PaintedObjects extends JFrame
 			didSquareStartEmpty = true;
 		}
 
-		private void paint(Graphics2D g2d)
+		void setNum(Integer v)
 		{
+			if( v != null )
+			{
+				numHeld = Integer.toString(v);
+			}
+			else
+			{
+				numHeld = "";
+			}
+		}
+
+		String getNum()
+		{
+			return numHeld;
+		}
+
+		void setPossArray(Integer[] Input)
+		{
+			if(Input != null)
+			{
+				for(int i=0;i<Input.length;i++)
+				{
+					if(Input[i] == null)
+						endPossArray[i] = "";
+					else
+						endPossArray[i] = Integer.toString(Input[i]);
+				}
+			}
+		}
+
+		@Override
+		protected void paintComponent(Graphics g)
+		{
+			super.paintComponent(g);
+			Graphics2D g2d = (Graphics2D)g.create();
+
 			// Set the color and font, then use own variables to
 			// paint the correct number at the correct location
 
@@ -435,90 +509,63 @@ public class PaintedObjects extends JFrame
 				g2d.drawString(numHeld,pracX,pracY);
 			}
 
-
+			g2d.dispose();
 		}
 
 	} // NumHolder class
 
+	NumHolder[][] fillInMap = new NumHolder[numRowInGrid][numColInGrid];
 
-	// OurNumHolder can create a NumHolder and call paint() on it
 
-	protected class OurNumHolder extends JPanel
+	// ~~~~~~~~~~
+	// ~~~~~~~~~~
+	// ~~~~~~~~~~
+
+
+	class NumAction extends AbstractAction
 	{
-		private NumHolder capableNumHolder;
+		Integer numToHandle;
 
-		protected OurNumHolder(int i, int j)
+		NumAction(Integer w)
 		{
-			capableNumHolder = new NumHolder(i, j);
+			super();
+			numToHandle = w;
 		}
 
-		protected void setNum(Integer v)
+		public void actionPerformed(ActionEvent e)
 		{
-			if( v != null )
-			{
-				capableNumHolder.numHeld = Integer.toString(v);
-			}
+			fillInMap[currentRow][currentCol].setNum(numToHandle);
+
+			if(numToHandle != null)
+				fillInMap[currentRow][currentCol].didSquareStartEmpty = false;
 			else
-			{
-				capableNumHolder.numHeld = "";
-			}
+				fillInMap[currentRow][currentCol].didSquareStartEmpty = true;
+
+			fillInMap[currentRow][currentCol].repaint();
 		}
+	}
 
-		protected void changeStartEmpty(boolean b)
-		{
-			capableNumHolder.didSquareStartEmpty = b;
-		}
+	NumAction oneAction = new NumAction(1);
+	NumAction twoAction = new NumAction(2);
+	NumAction threeAction = new NumAction(3);
+	NumAction fourAction = new NumAction(4);
+	NumAction fiveAction = new NumAction(5);
+	NumAction sixAction = new NumAction(6);
+	NumAction sevenAction = new NumAction(7);
+	NumAction eightAction = new NumAction(8);
+	NumAction nineAction = new NumAction(9);
+	NumAction backAction = new NumAction(null);
+	NumAction deleteAction = new NumAction(null);
 
-		protected boolean wasSquareEmpty()
-		{
-			return capableNumHolder.didSquareStartEmpty;
-		}
 
-		protected String getNum()
-		{
-			return capableNumHolder.numHeld;
-		}
+	// ~~~~~~~~~~
+	// ~~~~~~~~~~
+	// ~~~~~~~~~~
 
-		protected void setPossArray(Integer[] Input)
-		{
-			if(Input != null)
-			{
-				for(int i=0;i<Input.length;i++)
-				{
-					if(Input[i] == null)
-						capableNumHolder.endPossArray[i] = "";
-					else
-						capableNumHolder.endPossArray[i] = Integer.toString(Input[i]);
-				}
-			}
-		}
 
-		protected void adjustHumanSolve(Boolean b)
-		{
-			capableNumHolder.addedOnHumanSolve = b;
-		}
+	Box westButtonBackdrop = new Box(BoxLayout.Y_AXIS);
+	Box centerButtonBackdrop = new Box(BoxLayout.Y_AXIS);
+	Box eastButtonBackdrop = new Box(BoxLayout.Y_AXIS);
 
-		protected void adjustLastResort(Boolean b)
-		{
-			capableNumHolder.addedOnLastResort = b;
-		}
-
-		protected void resetNumHolder()
-		{
-			capableNumHolder.resetItAll();
-		}
-
-		@Override
-		protected void paintComponent(Graphics g)
-		{
-			super.paintComponent(g);
-			Graphics2D g2d = (Graphics2D)g.create();
-
-			capableNumHolder.paint(g2d);
-
-			g2d.dispose();
-		}
-
-	} // OurNumHolder class
 
 } // PaintedObjects

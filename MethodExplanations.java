@@ -5,32 +5,32 @@ public class MethodExplanations
 	private UsingLogicalMethods mainSolver;
 	private BoxTranslator myUnboxer;
 
-	public MethodExplanations(UsingLogicalMethods woohoo)
+	MethodExplanations(UsingLogicalMethods woohoo)
 	{
 		mainSolver = woohoo;
 		myUnboxer = woohoo.mySudoku.theUnboxer;
 	}
 
 
-	public Square SquareA;
-	public Square SquareB;
-	public Square SquareC;
+	Square SquareA;
+	Square SquareB;
+	Square SquareC;
 
-	public int foundResult;
+	int foundResult;
 
-	public HouseType houseContextType;
-	public HouseType houseTargetType;
+	HouseType houseContextType;
+	HouseType houseTargetType;
 
-	public int intTargetSet;
+	int intTargetSet;
 
-	public PTQ subsetType;
+	PTQ subsetType;
 
-	public int[] miscNumsA = new int[4];
-	public int[] miscNumsB = new int[4];
+	int[] miscNumsA = new int[4];
+	int[] miscNumsB = new int[4];
 
-	public Integer[] arrayOfKilledPoss = new Integer[7];
+	Integer[] arrayOfKilledPoss = new Integer[7];
 
-	public Integer[][] squaresForKilledPoss = new Integer[7][12];
+	Integer[][] squaresForKilledPoss = new Integer[7][12];
 
 
 
@@ -64,7 +64,7 @@ public class MethodExplanations
 
 
 
-	public void clearEnoughForNew(SolveMethod t)
+	void clearEnoughForNew(SolveMethod t)
 	{
 		int linesToClear = t.getLinesNeeded();
 		int slotsToClear = t.getSlotsNeeded();
@@ -189,7 +189,7 @@ public class MethodExplanations
 
 	// Big Kahuna. Responsible for putting the message together.
 
-	public String getStepOutput(SolveMethod theMethod)
+	String getStepOutput(SolveMethod theMethod)
 	{
 		String bigStepOutput = null; // It'll be changed before being returned
 

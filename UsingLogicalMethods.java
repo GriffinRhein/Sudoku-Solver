@@ -15,40 +15,50 @@ public class UsingLogicalMethods
 	MethodExplanations stringPrint;
 
 
+	// Incremented every time we are about to make progress
+
+	private int currentStepNum;
+
+	int getStepNum()
+	{
+		return currentStepNum;
+	}
+
+
 	// Gain ability to call all solving techniques
 
-	HiddenSingle trickHS;
-	PointingPairsTriples trickPPT;
-	ClaimingPairsTriples trickCPT;
-	NakedPairsTripsQuads trickNPTQ;
-	HiddenPairsTripsQuads trickHPTQ;
-	FishTwoThreeFour trickFTTF;
-	XY_Wing trickXYW;
+	private HiddenSingle trickHS;
+	private PointingPairsTriples trickPPT;
+	private ClaimingPairsTriples trickCPT;
+	private NakedPairsTripsQuads trickNPTQ;
+	private HiddenPairsTripsQuads trickHPTQ;
+	private FishTwoThreeFour trickFTTF;
+	private XY_Wing trickXYW;
 
-	ToCallMethod callNakedSingle;
-	ToCallMethod callHiddenSingle;
-	ToCallMethod callPointingPairTriple;
-	ToCallMethod callClaimingPairTriple;
-	ToCallMethod callNakedPair;
-	ToCallMethod callNakedTriple;
-	ToCallMethod callNakedQuad;
-	ToCallMethod callHiddenPair;
-	ToCallMethod callHiddenTriple;
-	ToCallMethod callHiddenQuad;
-	ToCallMethod callX_Wing;
-	ToCallMethod callSwordfish;
-	ToCallMethod callJellyfish;
-	ToCallMethod callXY_Wing;
+	private ToCallMethod callNakedSingle;
+	private ToCallMethod callHiddenSingle;
+	private ToCallMethod callPointingPairTriple;
+	private ToCallMethod callClaimingPairTriple;
+	private ToCallMethod callNakedPair;
+	private ToCallMethod callNakedTriple;
+	private ToCallMethod callNakedQuad;
+	private ToCallMethod callHiddenPair;
+	private ToCallMethod callHiddenTriple;
+	private ToCallMethod callHiddenQuad;
+	private ToCallMethod callX_Wing;
+	private ToCallMethod callSwordfish;
+	private ToCallMethod callJellyfish;
+	private ToCallMethod callXY_Wing;
 
-	ToCallMethod[] useForCalling;
-	SolveMethod[] useForString;
+	private ToCallMethod[] useForCalling;
+	private SolveMethod[] useForString;
 
-	int amountOfSolveMethods;
+	private int amountOfSolveMethods;
 
 
 	// Called by DrawNumsConstructor
 
-	public UsingLogicalMethods(FullSudoku inwardPuzzle)
+	UsingLogicalMethods(FullSudoku inwardPuzzle)
 	{
 		// Sudoku itself
 
@@ -103,10 +113,12 @@ public class UsingLogicalMethods
 
 		amountOfSolveMethods = 14;
 
+		currentStepNum = 0;
+
 	} // Constructor
 
 
-	public String solveOneStep()
+	String solveOneStep()
 	{
 		// Every time this function is called, somethingChanged is set to false, and
 		// it will remain that way until a solving method makes progress.
@@ -132,6 +144,9 @@ public class UsingLogicalMethods
 
 			if(somethingChanged)
 			{
+				currentStepNum++;
+
+
 				// Retrieve the relevant String. This is the only spot where stepDescription can change.
 
 				stepDescription = stringPrint.getStepOutput(useForString[methodCounter]);
@@ -150,4 +165,4 @@ public class UsingLogicalMethods
 
 	} // solveOneStep()
 
-} // SudokuSolveHumanMethods
+} // UsingLogicalMethods

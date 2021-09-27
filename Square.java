@@ -1,31 +1,35 @@
 public class Square
 {
-	public Integer result; // The final number that you see
-	public Integer[] possArray; // Every possible number it could still be
+	Integer result; // The final number that you see
+	Integer[] possArray; // Every possible number it could still be
 
-	public boolean answerAtStart = false;
+	String delHistory; // Record of when each possibility was axed
 
-	public int ownRow;
-	public int ownCol;
-	public int ownBox;
+	boolean answerAtStart; // Whether the result was entered by the user
 
-	public int VARIETY; // Total amount of possibilities at start
-	public int numPossLeft; // Number of possibilities left
+	int numPossLeft; // Number of possibilities currently left
 
-	private static int[][] findBox = new int[][]{ {0,1,2},
-												  {3,4,5},
-												  {6,7,8} };
 
-	public Integer lastResortResult;
-	public boolean lastResortIsResultFixed;
+	int ownRow, ownCol, ownBox;
+
+	private static int[][] findBox = new int[][]{ {0,1,2}, {3,4,5}, {6,7,8} };
+
+
+	Integer lastResortResult;
+	boolean lastResortIsResultFixed;
+
 
 	// Constructor
 
-	public Square(int selfRow, int selfCol)
+	Square(int selfRow, int selfCol)
 	{
-		// Initialize result to null
+		// Initialize variables to that of an unsolved square.
+		// If the result is entered directly by the user before the
+		// solving takes place, FullSudoku will adjust these.
 
 		result = null;
+		delHistory = "";
+		answerAtStart = false;
 
 		// Fix own row and column
 
@@ -35,13 +39,12 @@ public class Square
 
 		// Set full range of possibilities
 
-		VARIETY = 9;
-		numPossLeft = VARIETY;
-		possArray = new Integer[VARIETY];
+		numPossLeft = 9;
+		possArray = new Integer[9];
 
 		// Every possibility is its index plus 1
 
-		for(int i=0;i<VARIETY;i++)
+		for(int i=0;i<9;i++)
 		{ possArray[i] = i+1; }
 
 		// If result is finalized, result is not null and possArray is null

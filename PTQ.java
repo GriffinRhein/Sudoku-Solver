@@ -15,7 +15,7 @@ public enum PTQ
 
 	private final int easyInt;
 
-	public int getEasyInt()
+	int getEasyInt()
 	{
 		return easyInt;
 	}

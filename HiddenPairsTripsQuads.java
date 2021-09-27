@@ -5,7 +5,7 @@ public class HiddenPairsTripsQuads
 	private FullSudoku mySudoku;
 	private MethodExplanations myMethods;
 
-	public HiddenPairsTripsQuads(FullSudoku theSudoku, MethodExplanations theMethods)
+	HiddenPairsTripsQuads(FullSudoku theSudoku, MethodExplanations theMethods)
 	{
 		mySudoku = theSudoku;
 		myMethods = theMethods;
@@ -418,7 +418,7 @@ public class HiddenPairsTripsQuads
 	// Public functions putting everything to use. Calls HiddenSubsetsRCB()
 	// with a 2 for Pairs, 3 for Triples, 4 for Quads
 
-	public boolean HiddenPairs()
+	boolean HiddenPairs()
 	{
 		didWeGetOne = false;
 
@@ -428,7 +428,7 @@ public class HiddenPairsTripsQuads
 
 	} // HiddenPairs()
 
-	public boolean HiddenTriples()
+	boolean HiddenTriples()
 	{
 		didWeGetOne = false;
 
@@ -438,7 +438,7 @@ public class HiddenPairsTripsQuads
 
 	} // HiddenTriples()
 
-	public boolean HiddenQuads()
+	boolean HiddenQuads()
 	{
 		didWeGetOne = false;
 

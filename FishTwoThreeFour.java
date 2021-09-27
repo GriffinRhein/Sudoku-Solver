@@ -5,7 +5,7 @@ public class FishTwoThreeFour
 	private FullSudoku mySudoku;
 	private MethodExplanations myMethods;
 
-	public FishTwoThreeFour(FullSudoku theSudoku, MethodExplanations theMethods)
+	FishTwoThreeFour(FullSudoku theSudoku, MethodExplanations theMethods)
 	{
 		mySudoku = theSudoku;
 		myMethods = theMethods;
@@ -397,7 +397,7 @@ public class FishTwoThreeFour
 	// ~~~ Public functions putting the ones above to use. ~~~
 
 
-	public boolean X_Wing()
+	boolean X_Wing()
 	{
 		didWeGetOne = false;
 
@@ -427,7 +427,7 @@ public class FishTwoThreeFour
 		return didWeGetOne;
 	}
 
-	public boolean Swordfish()
+	boolean Swordfish()
 	{
 		didWeGetOne = false;
 
@@ -460,7 +460,7 @@ public class FishTwoThreeFour
 		return didWeGetOne;
 	}
 
-	public boolean Jellyfish()
+	boolean Jellyfish()
 	{
 		didWeGetOne = false;
 

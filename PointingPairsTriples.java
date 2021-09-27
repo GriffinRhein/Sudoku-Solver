@@ -10,7 +10,7 @@ public class PointingPairsTriples
 	private BoxTranslator myUnboxer;
 	private MethodExplanations myMethods;
 
-	public PointingPairsTriples(FullSudoku theSudoku, MethodExplanations theMethods)
+	PointingPairsTriples(FullSudoku theSudoku, MethodExplanations theMethods)
 	{
 		mySudoku = theSudoku;
 		myUnboxer = theSudoku.theUnboxer;
@@ -50,7 +50,7 @@ public class PointingPairsTriples
 
 	// Function, on its own, runs through the procedure for every one of the nine boxes.
 
-	public boolean PointingPairsTriples()
+	boolean PointingPairsTriples()
 	{
 		didWeGetOne = false;
 

@@ -2,13 +2,13 @@ public class CheckStartingNums
 {
 	private String[][] stringArray;
 
-	public CheckStartingNums(String[][] b)
+	CheckStartingNums(String[][] b)
 	{
 		stringArray = b;
 	}
 
 
-	public boolean isEntryDupeFree()
+	boolean isEntryDupeFree()
 	{
 		boolean areWeDupeFree = true;
 		int currentRCB = 0; 
@@ -40,7 +40,7 @@ public class CheckStartingNums
 	} // isSudokuDupeFree()
 
 
-	private boolean checkOneRCB(String[] theRCB)
+	boolean checkOneRCB(String[] theRCB)
 	{
 		// Create array of booleans, and fill it with false
 
@@ -81,7 +81,7 @@ public class CheckStartingNums
 	} // checkForDupesOneRCB()
 
 
-	public boolean areThereSeventeenClues()
+	boolean areThereSeventeenClues()
 	{
 		int myCounter = 0;
 

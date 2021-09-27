@@ -5,7 +5,7 @@ public class NakedPairsTripsQuads
 	private FullSudoku mySudoku;
 	private MethodExplanations myMethods;
 
-	public NakedPairsTripsQuads(FullSudoku theSudoku, MethodExplanations theMethods)
+	NakedPairsTripsQuads(FullSudoku theSudoku, MethodExplanations theMethods)
 	{
 		mySudoku = theSudoku;
 		myMethods = theMethods;
@@ -374,7 +374,7 @@ public class NakedPairsTripsQuads
 	// Public functions putting everything to use. Calls NakedSubsetsRCB()
 	// with a 2 for Pairs, 3 for Triples, 4 for Quads
 
-	public boolean NakedPairs()
+	boolean NakedPairs()
 	{
 		didWeGetOne = false;
 
@@ -384,7 +384,7 @@ public class NakedPairsTripsQuads
 
 	} // NakedPairs()
 
-	public boolean NakedTriples()
+	boolean NakedTriples()
 	{
 		didWeGetOne = false;
 
@@ -394,7 +394,7 @@ public class NakedPairsTripsQuads
 
 	} // NakedTriples()
 
-	public boolean NakedQuads()
+	boolean NakedQuads()
 	{
 		didWeGetOne = false;
 

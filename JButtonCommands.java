@@ -4,24 +4,21 @@ public class JButtonCommands
 {
 	DrawNumsConstructor theHub;
 
-	public JButtonCommands(DrawNumsConstructor input)
+	JButtonCommands(DrawNumsConstructor input)
 	{
 		theHub = input;
 	}
 
 
-	public void resetEverything()
+	void resetEverything()
 	{
 		theHub.itsTheTextArea.setText("");
-
-		theHub.completeBanner.resetSolveText();
-		theHub.completeBanner.repaint();
 
 		for(int i=0;i<9;i++)
 		{
 			for(int j=0;j<9;j++)
 			{
-				theHub.fillInMap[i][j].resetNumHolder();
+				theHub.fillInMap[i][j].resetItAll();
 				theHub.fillInMap[i][j].repaint();
 			}
 		}
@@ -29,26 +26,17 @@ public class JButtonCommands
 		theHub.currentRow = 0;
 		theHub.currentCol = 0;
 
-		theHub.ourRecLocation.x = 0;
-		theHub.ourRecLocation.y = 0;
-
-		theHub.ourRectWidth = theHub.gridSquareWidth;
-		theHub.ourRectHeight = theHub.gridSquareHeight;
-
+		theHub.recToWorkWith.setDrawStatus(true);
 		theHub.recToWorkWith.repaint();
 
-		if(!(theHub.controlsOn))
-			theHub.turnControlsOn();
+		theHub.turnControlsOn();
 
 	} // resetEverything()
 
 
-	public void revertToUserInput()
+	void revertToUserInput()
 	{
 		theHub.itsTheTextArea.setText("");
-
-		theHub.completeBanner.resetSolveText();
-		theHub.completeBanner.repaint();
 
 		for(int i=0;i<9;i++)
 		{
@@ -56,24 +44,21 @@ public class JButtonCommands
 			{
 				if(theHub.stringCompForFinal[i][j] == "")
 				{
-					theHub.fillInMap[i][j].resetNumHolder();
+					theHub.fillInMap[i][j].resetItAll();
 					theHub.fillInMap[i][j].repaint();
 				}
 			}
 		}
 
-		theHub.ourRectWidth = theHub.gridSquareWidth;
-		theHub.ourRectHeight = theHub.gridSquareHeight;
-
+		theHub.recToWorkWith.setDrawStatus(true);
 		theHub.recToWorkWith.repaint();
 
-		if(!(theHub.controlsOn))
-			theHub.turnControlsOn();
+		theHub.turnControlsOn();
 
 	} // revertToUserInput()
 
 
-	public String savingSudoku()
+	String savingSudoku()
 	{
 		StringBuilder builtString = new StringBuilder();
 		int blankCounter = 0;
@@ -86,7 +71,7 @@ public class JButtonCommands
 			{
 				// Check whether the square was filled in by the user
 
-				if(!(theHub.fillInMap[y][x].wasSquareEmpty()))
+				if(!(theHub.fillInMap[y][x].didSquareStartEmpty))
 				{
 					// If the user entered a number, then append a letter
 					// indicating how many blanks there were preceding it.
@@ -126,7 +111,7 @@ public class JButtonCommands
 	} // savingSudoku()
 
 
-	public int loadingSudoku(String theString)
+	int loadingSudoku(String theString)
 	{
 		// testString will be null if the user hit Cancel.
 		// In that case, don't do anything, but don't
@@ -222,9 +207,9 @@ public class JButtonCommands
 				theHub.fillInMap[s][t].setNum(sudokuToLoad[s][t]);
 
 				if(sudokuToLoad[s][t] != null)
-					theHub.fillInMap[s][t].changeStartEmpty(false);
+					theHub.fillInMap[s][t].didSquareStartEmpty = false;
 				else
-					theHub.fillInMap[s][t].changeStartEmpty(true);
+					theHub.fillInMap[s][t].didSquareStartEmpty = true;
 
 				theHub.fillInMap[s][t].repaint();
 			}

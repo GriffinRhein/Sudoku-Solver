@@ -4,21 +4,20 @@ public class FullSudoku
 {
 	// Squares themselves
 
-	public Square[][] SudokuMap = new Square[9][9];
+	Square[][] SudokuMap = new Square[9][9];
 
-	public String[][] forNumsUseFill;
+	String[][] forNumsUseFill;
 
-	public int squaresSolved = 0;
+	int squaresSolved = 0;
 
-	protected int initialInputSquares = 0;
+	int initialInputSquares = 0;
 
-	private final int widthAndHeight = 9;
+	BoxTranslator theUnboxer = new BoxTranslator();
 
-	public BoxTranslator theUnboxer = new BoxTranslator();
 
 	private boolean impossiblePuzzle = false;
 
-	public boolean isPuzzleImpossible()
+	boolean isPuzzleImpossible()
 	{
 		return impossiblePuzzle;
 	}
@@ -32,7 +31,7 @@ public class FullSudoku
 
 	private Square mostRecentNakedSingle;
 
-	public Square getMostRecentNakedSingle()
+	Square getMostRecentNakedSingle()
 	{
 		return mostRecentNakedSingle;
 	}
@@ -52,14 +51,14 @@ public class FullSudoku
 	// still have 1 in the possArray, index 1 details how
 	// many squares still have 2 in the possArray, etc.
 
-	public int[][] rowPossPrevalence = new int[9][9];
-	public int[][] colPossPrevalence = new int[9][9];
-	public int[][] boxPossPrevalence = new int[9][9];
+	int[][] rowPossPrevalence = new int[9][9];
+	int[][] colPossPrevalence = new int[9][9];
+	int[][] boxPossPrevalence = new int[9][9];
 
 
 	// Provide a row of squares
 
-	public Square[] provideRow(int rowNum)
+	Square[] provideRow(int rowNum)
 	{
 		Square[] rowProvided = new Square[9];
 
@@ -73,7 +72,7 @@ public class FullSudoku
 
 	// Provide a column of squares
 
-	public Square[] provideCol(int colNum)
+	Square[] provideCol(int colNum)
 	{
 		Square[] colProvided = new Square[9];
 
@@ -87,7 +86,7 @@ public class FullSudoku
 
 	// Provide a box of squares
 
-	public Square[] provideBox(int boxNum)
+	Square[] provideBox(int boxNum)
 	{
 		Square[] boxProvided = new Square[9];
 
@@ -108,7 +107,7 @@ public class FullSudoku
 	// Provide every square sharing a row, column, or box with one particular square
 	// There are exactly 20 such squares, every time
 
-	public Square[] provideAllSharingRCB(Square rootSquare)
+	Square[] provideAllSharingRCB(Square rootSquare)
 	{
 		Square[] finalList = new Square[20];
 		int listTraverse = 0;
@@ -164,7 +163,7 @@ public class FullSudoku
 	// a number from a square's possArray if is there, then put the
 	// square in the linked list if it is now down to 1 possibility.
 
-	public boolean elimFromPossArray(Square a,Integer b)
+	boolean elimFromPossArray(Square a,Integer b)
 	{
 		if(impossiblePuzzle)
 			return false;
@@ -295,7 +294,7 @@ public class FullSudoku
 
 	// Naked Single Implementation
 
-	protected boolean NakedSingle()
+	boolean NakedSingle()
 	{
 		if(impossiblePuzzle)
 			return false;
@@ -336,7 +335,7 @@ public class FullSudoku
 
 	// Constructor! Called by finalAct() in DrawNumsConstructor
 
-	public FullSudoku(String[][] thisInput)
+	FullSudoku(String[][] thisInput)
 	{
 		forNumsUseFill = thisInput;
 
@@ -377,15 +376,16 @@ public class FullSudoku
 					squareWeUse = SudokuMap[i][j];
 					resultOfSquare = Integer.parseInt(forNumsUseFill[i][j]);
 
-					initialInputSquares++;
-
-					squareWeUse.answerAtStart = true;
-
 					for(Integer k=1;k<=9;k++)
 					{
 						if(!(k.equals(resultOfSquare)))
 							elimFromPossArray(squareWeUse,k);
 					}
+
+					squareWeUse.delHistory = null;
+					squareWeUse.answerAtStart = true;
+
+					initialInputSquares++;
 				}
 			}
 		}

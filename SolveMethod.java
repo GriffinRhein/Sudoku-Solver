@@ -1,4 +1,4 @@
-enum SolveMethod
+public enum SolveMethod
 {
 	// These exist for the benefit of MethodExplanations,
 	// which needs to know how to use the data it has been
@@ -37,7 +37,7 @@ enum SolveMethod
 
 	private final int linesNeeded;
 
-	public int getLinesNeeded()
+	int getLinesNeeded()
 	{
 		return linesNeeded;
 	}
@@ -52,7 +52,7 @@ enum SolveMethod
 
 	private final int timesAcross;
 
-	public int getTimesAcross()
+	int getTimesAcross()
 	{
 		return timesAcross;
 	}
@@ -63,7 +63,7 @@ enum SolveMethod
 
 	private final int slotsNeeded;
 
-	public int getSlotsNeeded()
+	int getSlotsNeeded()
 	{
 		return slotsNeeded;
 	}
@@ -72,7 +72,7 @@ enum SolveMethod
 	// For determining which String
 	// to use in addElimStrings()
 
-	public enum MoreGeneral
+	enum MoreGeneral
 	{
 		Single,
 		PCNH,
@@ -82,7 +82,7 @@ enum SolveMethod
 
 	private final MoreGeneral genMethod;
 
-	public MoreGeneral getGenMethod()
+	MoreGeneral getGenMethod()
 	{
 		return genMethod;
 	}

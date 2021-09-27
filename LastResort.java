@@ -3,7 +3,7 @@ public class LastResort
 	private FullSudoku mySudoku;
 	private boolean wasSolveSuccessful;
 
-	public LastResort(FullSudoku theSudoku)
+	LastResort(FullSudoku theSudoku)
 	{
 		mySudoku = theSudoku;
 		wasSolveSuccessful = false;
@@ -35,7 +35,7 @@ public class LastResort
 	// This should be the ONLY function outside of the constructor to do anything to FullSudoku.
 	// I also don't want it to be called by anything in here; call it in DrawNumsConstructor.
 
-	public void copyLastResortToSudoku()
+	void copyLastResortToSudoku()
 	{
 		// As a precautionary measure, even this function will not do anything unless
 		// another solving method in this class changed wasSolveSuccessful to True.
@@ -90,7 +90,7 @@ public class LastResort
 	// and whatever UsingLogicalMethods came up with. I feel that it may not be
 	// necessary, but I'll keep it until I'm sure.
 
-	public boolean sameResults()
+	boolean sameResults()
 	{
 		Square officialSquare;
 
@@ -116,7 +116,7 @@ public class LastResort
 
 	// Called by DrawNumsConstructor
 
-	public boolean initiateCrudeVirtualSolve()
+	boolean initiateCrudeVirtualSolve()
 	{
 		wasSolveSuccessful = crudeVirtualSolve();
 
