@@ -1,20 +1,22 @@
 import java.awt.BasicStroke;
 import java.awt.Canvas;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GridBagConstraints;
 
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JTextArea;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
 
 public class PaintedObjects extends JFrame
 {
@@ -26,6 +28,8 @@ public class PaintedObjects extends JFrame
 	final int numRowInGrid = 9;
 	final int numRowBetweenThick = 3;
 
+	final int numPossPerSquare = 9;
+
 
 	// Current row & column we are highlighting
 
@@ -33,48 +37,42 @@ public class PaintedObjects extends JFrame
 	int currentRow = 0;
 
 
+	// Drawing Tools
+
+	private Color theBlack = new Color(0,0,0);
+	private Color theRed = new Color(255,0,0);
+	private Color theBlue = new Color(0,0,255);
+	private Color thePurple = new Color(125,0,225);
+
+	private Font myFont = new Font("TimesRoman",Font.PLAIN,42);
+	private Canvas c1 = new Canvas();
+	private FontMetrics fm = c1.getFontMetrics(myFont);
+
+	private Font possArrayFont = new Font("TimesRoman",Font.PLAIN,18);
+	private Canvas c2 = new Canvas();
+	private FontMetrics possArrayFontFM = c2.getFontMetrics(possArrayFont);
+
+
 	// Influenced by size of JFrame
 
-	int sudokuBackdropWidth;
-	int sudokuBackdropHeight;
-
 	int gridSquareWidth;
-	int gridTotalWidth;
-
 	int gridSquareHeight;
-	int gridTotalHeight;
 
-	Dimension standardButtonSize;
-	Dimension solveButtonSize;
-	Dimension emptySizeBlock;
+	int fullGridWidth;
+	int fullGridHeight;
 
 
-	// ~~~~~~~~~~
-	// ~~~~~~~~~~
-	// ~~~~~~~~~~
+	// Function which sets those values
 
-
-	class SudokuBackdrop extends JPanel
+	void setSizeValues(int everythingWidth, int everythingHeight)
 	{
-		void applySizeValues()
-		{
-			sudokuBackdropWidth = this.getWidth();
-			sudokuBackdropHeight = this.getHeight();
+		gridSquareWidth = everythingWidth/(numColInGrid+11);
+		gridSquareHeight = everythingHeight/(numRowInGrid+4);
 
-			gridSquareWidth = sudokuBackdropWidth/(numColInGrid+1);
-			gridSquareHeight = sudokuBackdropHeight/(numRowInGrid+1);
+		fullGridWidth = gridSquareWidth*numColInGrid;
+		fullGridHeight = gridSquareHeight*numRowInGrid;
 
-			gridTotalWidth = sudokuBackdropWidth-gridSquareWidth;
-			gridTotalHeight = sudokuBackdropHeight-gridSquareHeight;
-
-			standardButtonSize = new Dimension(gridSquareWidth*2,gridSquareHeight/2);
-			solveButtonSize = new Dimension(gridSquareWidth*3,(gridSquareHeight/2)+20);
-			emptySizeBlock = new Dimension(gridSquareWidth*3,(gridSquareHeight/2)-10);
-		}
-
-	} // SudokuBackdrop class
-
-	SudokuBackdrop sudokuGridBackdrop = new SudokuBackdrop();
+	} // setSizeValues()
 
 
 	// ~~~~~~~~~~
@@ -116,7 +114,7 @@ public class PaintedObjects extends JFrame
 
 	} // ColLabels Class
 
-	ColLabels colLabelsToWorkWith = new ColLabels();
+	ColLabels theColLabels = new ColLabels();
 
 
 	// ~~~~~~~~~~
@@ -159,7 +157,7 @@ public class PaintedObjects extends JFrame
 
 	} // RowLabels class
 
-	RowLabels rowLabelsToWorkWith = new RowLabels();
+	RowLabels theRowLabels = new RowLabels();
 
 
 	// ~~~~~~~~~~
@@ -210,64 +208,6 @@ public class PaintedObjects extends JFrame
 	// ~~~~~~~~~~
 
 
-	Action rightAction = new AbstractAction()
-	{
-		public void actionPerformed(ActionEvent e)
-		{
-			if(currentCol != numColInGrid-1)
-			{ currentCol++; }
-			else
-			{ currentCol = 0; }
-
-			recToWorkWith.repaint();
-		}
-	};
-
-	Action leftAction = new AbstractAction()
-	{
-		public void actionPerformed(ActionEvent e)
-		{
-			if(currentCol != 0)
-			{ currentCol--; }
-			else
-			{ currentCol = numColInGrid-1; }
-
-			recToWorkWith.repaint();
-		}
-	};
-
-	Action downAction = new AbstractAction()
-	{
-		public void actionPerformed(ActionEvent e)
-		{
-			if(currentRow != numRowInGrid-1)
-			{ currentRow++; }
-			else
-			{ currentRow = 0; }
-
-			recToWorkWith.repaint();
-		}
-	};
-
-	Action upAction = new AbstractAction()
-	{
-		public void actionPerformed(ActionEvent e)
-		{
-			if(currentRow != 0)
-			{ currentRow--; }
-			else
-			{ currentRow = numRowInGrid-1; }
-
-			recToWorkWith.repaint();
-		}
-	};
-
-
-	// ~~~~~~~~~~
-	// ~~~~~~~~~~
-	// ~~~~~~~~~~
-
-
 	class GridLines extends JPanel
 	{
 		@Override
@@ -297,12 +237,12 @@ public class PaintedObjects extends JFrame
 				if(i % numColBetweenThick == 0)
 				{
 					g2d.setStroke(thickerBorder);
-					g2d.drawLine(handyCoord,0,handyCoord,gridTotalHeight);
+					g2d.drawLine(handyCoord,0,handyCoord,fullGridHeight);
 					g2d.setStroke(normalBorder);
 				}
 				else
 				{
-					g2d.drawLine(handyCoord,0,handyCoord,gridTotalHeight);
+					g2d.drawLine(handyCoord,0,handyCoord,fullGridHeight);
 				}
 			}
 
@@ -315,12 +255,12 @@ public class PaintedObjects extends JFrame
 				if(j % numRowBetweenThick == 0)
 				{
 					g2d.setStroke(thickerBorder);
-					g2d.drawLine(0,handyCoord,gridTotalWidth,handyCoord);
+					g2d.drawLine(0,handyCoord,fullGridWidth,handyCoord);
 					g2d.setStroke(normalBorder);
 				}
 				else
 				{
-					g2d.drawLine(0,handyCoord,gridTotalWidth,handyCoord);
+					g2d.drawLine(0,handyCoord,fullGridWidth,handyCoord);
 				}
 			}
 
@@ -340,33 +280,10 @@ public class PaintedObjects extends JFrame
 	// ~~~~~~~~~~
 
 
-	private Color theBlack = new Color(0,0,0);
-	private Color theRed = new Color(255,0,0);
-	private Color theBlue = new Color(0,0,255);
-	private Color thePurple = new Color(125,0,225);
-
-	private Font myFont = new Font("TimesRoman",Font.PLAIN,42);
-	private Canvas c1 = new Canvas();
-	private FontMetrics fm = c1.getFontMetrics(myFont);
-
-	private Font smallerFont = new Font("TimesRoman",Font.PLAIN,28);
-	private Canvas c2 = new Canvas();
-	private FontMetrics smallerFM = c2.getFontMetrics(smallerFont);
-
-	private Font possArrayFont = new Font("TimesRoman",Font.PLAIN,18);
-	private Canvas c3 = new Canvas();
-	private FontMetrics possArrayFontFM = c3.getFontMetrics(possArrayFont);
-
-
-	// ~~~~~~~~~~
-	// ~~~~~~~~~~
-	// ~~~~~~~~~~
-
-
 	class NumHolder extends JPanel
 	{
 		private String numHeld;
-		private String[] endPossArray;
+		private String[] endPossArray = new String[numPossPerSquare];
 
 		private int ownRow;
 		private int ownCol;
@@ -386,6 +303,9 @@ public class PaintedObjects extends JFrame
 
 		boolean didSquareStartEmpty = true;
 
+		private Integer stepSolved;
+		private Integer[] stepPossEliminated = new Integer[9];
+
 
 		// Constructor
 
@@ -395,9 +315,12 @@ public class PaintedObjects extends JFrame
 
 			numHeld = "";
 
-			// Initialize endPossArray to 9 empty strings
+			// Initialize endPossArray to all empty strings
 
-			endPossArray = new String[]{"","","","","","","","",""};
+			for(int s=0;s<numPossPerSquare;s++)
+			{
+				endPossArray[s] = "";
+			}
 
 			// Initialize own row and column
 
@@ -408,25 +331,50 @@ public class PaintedObjects extends JFrame
 
 			howFarY = new int[]{0,0,0,20,20,20,40,40,40};
 			howFarX = new int[]{0,20,40,0,20,40,0,20,40};
+
+			// Initialize stepSolved to null
+
+			stepSolved = null;
+
+			// Initialize stepPossEliminated to nine null entries
+
+			for(int s=0;s<stepPossEliminated.length;s++)
+			{
+				stepPossEliminated[s] = null;
+			}
 		}
 
 		void resetItAll()
 		{
 			numHeld = "";
-			for(int s=0;s<9;s++)
+
+			for(int s=0;s<numPossPerSquare;s++)
 			{
 				endPossArray[s] = "";
 			}
+
+			stepSolved = null;
+			
+			for(int s=0;s<stepPossEliminated.length;s++)
+			{
+				stepPossEliminated[s] = null;
+			}
+
 			addedOnHumanSolve = false;
 			addedOnLastResort = false;
 			didSquareStartEmpty = true;
 		}
 
-		void setNum(Integer v)
+		void setNum(Integer numToUse, Integer stepOfSolve)
 		{
-			if( v != null )
+			if(numToUse != null)
 			{
-				numHeld = Integer.toString(v);
+				if(stepOfSolve != null && numHeld.isBlank())
+				{
+					stepSolved = stepOfSolve;
+				}
+
+				numHeld = Integer.toString(numToUse);
 			}
 			else
 			{
@@ -439,14 +387,21 @@ public class PaintedObjects extends JFrame
 			return numHeld;
 		}
 
-		void setPossArray(Integer[] Input)
+		void setPossArray(Integer[] Input, Integer stepOfSolve)
 		{
 			if(Input != null)
 			{
 				for(int i=0;i<Input.length;i++)
 				{
 					if(Input[i] == null)
+					{
+						if(endPossArray[i] != "")
+						{
+							stepPossEliminated[i] = stepOfSolve;
+						}
+
 						endPossArray[i] = "";
+					}
 					else
 						endPossArray[i] = Integer.toString(Input[i]);
 				}
@@ -522,6 +477,64 @@ public class PaintedObjects extends JFrame
 	// ~~~~~~~~~~
 
 
+	class EmptyLayer extends JPanel
+	{
+		String name;
+
+		EmptyLayer(String a)
+		{
+			name = a;
+		}
+
+	} // EmptyLayer class
+
+	EmptyLayer northBorder = new EmptyLayer("North Border");
+	EmptyLayer southBorder = new EmptyLayer("South Border");
+	EmptyLayer westBorder = new EmptyLayer("West Border");
+	EmptyLayer eastBorder = new EmptyLayer("East Border");
+	EmptyLayer containsEverything = new EmptyLayer("Contains Everything");
+
+	EmptyLayer sudokuSideBackdrop = new EmptyLayer("Sudoku Side Backdrop");
+	EmptyLayer highMiddleGap = new EmptyLayer("Sudoku/Text Gap");
+	EmptyLayer textSideBackdrop = new EmptyLayer("Text Side Backdrop");
+
+	EmptyLayer panelOfButtonPanels = new EmptyLayer("Panel Of Button Panels");
+
+	EmptyLayer emptyButtonBackdrop = new EmptyLayer("Empty Button Backdrop");
+	EmptyLayer westButtonBackdrop = new EmptyLayer("Leftmost Button Backdrop");
+	EmptyLayer centerButtonBackdrop = new EmptyLayer("Center Button Backdrop");
+	EmptyLayer eastButtonBackdrop = new EmptyLayer("Rightmost Button Backdrop");
+
+	EmptyLayer normalButtonGap1 = new EmptyLayer("First Button Gap");
+	EmptyLayer normalButtonGap2 = new EmptyLayer("Second Button Gap");
+	EmptyLayer normalButtonGap3 = new EmptyLayer("Third Button Gap");
+	EmptyLayer normalButtonGap4 = new EmptyLayer("Fourth Button Gap");
+
+	EmptyLayer solveButtonGap1 = new EmptyLayer("First Solve Button Gap");
+	EmptyLayer solveButtonGap2 = new EmptyLayer("Second Solve Button Gap");
+
+	EmptyLayer textGap1 = new EmptyLayer("North Text Gap");
+	EmptyLayer textGap2 = new EmptyLayer("South Text Gap");
+
+	void debuggingSizeCheck()
+	{
+		EmptyLayer[] coolArray = new EmptyLayer[]{northBorder,southBorder,westBorder,eastBorder,
+		containsEverything,sudokuSideBackdrop,highMiddleGap,textSideBackdrop,panelOfButtonPanels,
+		emptyButtonBackdrop,westButtonBackdrop,centerButtonBackdrop,eastButtonBackdrop,normalButtonGap1,
+		normalButtonGap2,normalButtonGap3,normalButtonGap4,solveButtonGap1,solveButtonGap2,textGap1,textGap2};
+
+		for(int i=0;i<coolArray.length;i++)
+		{
+			System.out.println(coolArray[i].name+": ("+coolArray[i].getWidth()+", "+coolArray[i].getHeight()+")");
+		}
+	}
+
+
+	// ~~~~~~~~~~
+	// ~~~~~~~~~~
+	// ~~~~~~~~~~
+
+
 	class NumAction extends AbstractAction
 	{
 		Integer numToHandle;
@@ -534,7 +547,7 @@ public class PaintedObjects extends JFrame
 
 		public void actionPerformed(ActionEvent e)
 		{
-			fillInMap[currentRow][currentCol].setNum(numToHandle);
+			fillInMap[currentRow][currentCol].setNum(numToHandle,null);
 
 			if(numToHandle != null)
 				fillInMap[currentRow][currentCol].didSquareStartEmpty = false;
@@ -563,9 +576,124 @@ public class PaintedObjects extends JFrame
 	// ~~~~~~~~~~
 
 
-	Box westButtonBackdrop = new Box(BoxLayout.Y_AXIS);
-	Box centerButtonBackdrop = new Box(BoxLayout.Y_AXIS);
-	Box eastButtonBackdrop = new Box(BoxLayout.Y_AXIS);
+	Action rightAction = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			if(currentCol != numColInGrid-1)
+			{ currentCol++; }
+			else
+			{ currentCol = 0; }
+
+			recToWorkWith.repaint();
+		}
+	};
+
+	Action leftAction = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			if(currentCol != 0)
+			{ currentCol--; }
+			else
+			{ currentCol = numColInGrid-1; }
+
+			recToWorkWith.repaint();
+		}
+	};
+
+	Action downAction = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			if(currentRow != numRowInGrid-1)
+			{ currentRow++; }
+			else
+			{ currentRow = 0; }
+
+			recToWorkWith.repaint();
+		}
+	};
+
+	Action upAction = new AbstractAction()
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			if(currentRow != 0)
+			{ currentRow--; }
+			else
+			{ currentRow = numRowInGrid-1; }
+
+			recToWorkWith.repaint();
+		}
+	};
+
+
+	// ~~~~~~~~~~
+	// ~~~~~~~~~~
+	// ~~~~~~~~~~
+
+
+	JButton itsTheResetButton = new JButton();
+	JButton itsTheSolveButton = new JButton();
+	JButton itsTheUndoSolveButton = new JButton();
+	JButton itsTheSaveSudokuButton = new JButton();
+	JButton itsTheLoadSudokuButton = new JButton();
+	JButton itsTheBeginStepsButton = new JButton();
+
+
+	// ~~~~~~~~~~
+	// ~~~~~~~~~~
+	// ~~~~~~~~~~
+
+
+	class AllStepsHolder extends JPanel
+	{
+		private int currentStepNum = 1;
+		private double myWeight = 1e-300;
+
+		void resetStepNumber()
+		{
+			currentStepNum = 1;
+			myWeight = 1e-300;
+		}
+
+		void addOneStep(String message)
+		{
+			JTextArea newStep = new JTextArea(message);
+
+			newStep.setLineWrap(true);
+			newStep.setWrapStyleWord(true);
+			newStep.setEditable(false);
+			newStep.setFocusable(false);
+
+			GridBagConstraints c = new GridBagConstraints();
+			c.fill = GridBagConstraints.HORIZONTAL;
+			c.anchor = GridBagConstraints.PAGE_START;
+			c.gridy = currentStepNum;
+			c.weightx = 1d;
+			c.weighty = myWeight;
+
+			add(newStep,c);
+
+			pack();
+
+			currentStepNum++;
+			myWeight *= 1000.0;
+		}
+
+	} // AllStepsHolder class
+
+	AllStepsHolder holderOfAllSteps = new AllStepsHolder();
+
+
+//	JTextArea itsTheTextArea = new JTextArea();
+
+	private int vertScrollPolicy = JScrollPane.VERTICAL_SCROLLBAR_ALWAYS;
+	private int horiScrollPolicy = JScrollPane.HORIZONTAL_SCROLLBAR_NEVER;
+
+	JScrollPane itsTheScrollPane = new JScrollPane(holderOfAllSteps,vertScrollPolicy,horiScrollPolicy);
+	JScrollBar verticalBar = itsTheScrollPane.getVerticalScrollBar();
 
 
 } // PaintedObjects

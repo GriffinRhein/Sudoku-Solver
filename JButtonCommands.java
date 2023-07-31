@@ -12,14 +12,16 @@ public class JButtonCommands
 
 	void resetEverything()
 	{
-		theHub.itsTheTextArea.setText("");
+		theHub.holderOfAllSteps.resetStepNumber();
+		theHub.holderOfAllSteps.removeAll();
+		theHub.holderOfAllSteps.repaint();
 
-		for(int i=0;i<9;i++)
+		for(int y=0;y<theHub.numRowInGrid;y++)
 		{
-			for(int j=0;j<9;j++)
+			for(int x=0;x<theHub.numColInGrid;x++)
 			{
-				theHub.fillInMap[i][j].resetItAll();
-				theHub.fillInMap[i][j].repaint();
+				theHub.fillInMap[y][x].resetItAll();
+				theHub.fillInMap[y][x].repaint();
 			}
 		}
 
@@ -36,16 +38,18 @@ public class JButtonCommands
 
 	void revertToUserInput()
 	{
-		theHub.itsTheTextArea.setText("");
+		theHub.holderOfAllSteps.resetStepNumber();
+		theHub.holderOfAllSteps.removeAll();
+		theHub.holderOfAllSteps.repaint();
 
-		for(int i=0;i<9;i++)
+		for(int y=0;y<theHub.numRowInGrid;y++)
 		{
-			for(int j=0;j<9;j++)
+			for(int x=0;x<theHub.numColInGrid;x++)
 			{
-				if(theHub.stringCompForFinal[i][j] == "")
+				if(theHub.fillInMap[y][x].didSquareStartEmpty)
 				{
-					theHub.fillInMap[i][j].resetItAll();
-					theHub.fillInMap[i][j].repaint();
+					theHub.fillInMap[y][x].resetItAll();
+					theHub.fillInMap[y][x].repaint();
 				}
 			}
 		}
@@ -63,11 +67,11 @@ public class JButtonCommands
 		StringBuilder builtString = new StringBuilder();
 		int blankCounter = 0;
 
-		// Go through each square in the 9x9 grid
+		// Go through each square in the grid
 
-		for(int y=0;y<9;y++)
+		for(int y=0;y<theHub.numRowInGrid;y++)
 		{
-			for(int x=0;x<9;x++)
+			for(int x=0;x<theHub.numColInGrid;x++)
 			{
 				// Check whether the square was filled in by the user
 
@@ -97,7 +101,7 @@ public class JButtonCommands
 					// But make sure you get the final letter down if you've reached the end,
 					// or throw down a "z" & reset if you've somehow gotten 26 blanks in a row
 
-					if((y == 8 && x == 8) || blankCounter > 25)
+					if((y == theHub.numRowInGrid-1 && x == theHub.numColInGrid-1) || blankCounter > 25)
 					{
 						builtString.append((char)(blankCounter+96));
 						blankCounter = 0;
@@ -135,7 +139,7 @@ public class JButtonCommands
 		}
 
 
-		Integer[][] sudokuToLoad = new Integer[9][9];
+		Integer[][] sudokuToLoad = new Integer[theHub.numRowInGrid][theHub.numColInGrid];
 
 		int loadY = 0;
 		int loadX = 0;
@@ -155,12 +159,12 @@ public class JButtonCommands
 
 				while(loadCounter > 0)
 				{
-					if(loadY > 8)
+					if(loadY > theHub.numRowInGrid-1)
 						return 3;
 
 					sudokuToLoad[loadY][loadX] = null;
 
-					if(loadX != 8)
+					if(loadX != theHub.numColInGrid-1)
 					{
 						loadX++;
 					}
@@ -175,12 +179,12 @@ public class JButtonCommands
 			}
 			else
 			{
-				if(loadY > 8)
+				if(loadY > theHub.numRowInGrid-1)
 					return 3;
 
 				sudokuToLoad[loadY][loadX] = Character.getNumericValue(charArray[a]);
 
-				if(loadX != 8)
+				if(loadX != theHub.numColInGrid-1)
 				{
 					loadX++;
 				}
@@ -194,24 +198,24 @@ public class JButtonCommands
 
 		}
 
-		if(loadY < 9)
+		if(loadY < theHub.numRowInGrid)
 			return 2;
 
 
 		// Otherwise, give fillInMap everything
 
-		for(int s=0;s<9;s++)
+		for(int y=0;y<theHub.numRowInGrid;y++)
 		{
-			for(int t=0;t<9;t++)
+			for(int x=0;x<theHub.numColInGrid;x++)
 			{
-				theHub.fillInMap[s][t].setNum(sudokuToLoad[s][t]);
+				theHub.fillInMap[y][x].setNum(sudokuToLoad[y][x],null);
 
-				if(sudokuToLoad[s][t] != null)
-					theHub.fillInMap[s][t].didSquareStartEmpty = false;
+				if(sudokuToLoad[y][x] != null)
+					theHub.fillInMap[y][x].didSquareStartEmpty = false;
 				else
-					theHub.fillInMap[s][t].didSquareStartEmpty = true;
+					theHub.fillInMap[y][x].didSquareStartEmpty = true;
 
-				theHub.fillInMap[s][t].repaint();
+				theHub.fillInMap[y][x].repaint();
 			}
 		}
 
