@@ -37,7 +37,7 @@ public class DrawNumsConstructor extends PaintedObjects
 	// Makes sure the puzzle is solvable, and later applies
 	// that solution if UsingLogicalMethods falters
 
-	LastResort inputForLastResort;
+	NonhumanSolver theNonhumanSolver;
 
 
 	// Pop-Up windows for various purposes
@@ -48,7 +48,7 @@ public class DrawNumsConstructor extends PaintedObjects
 	// Stock messages to insert into a JTextArea.
 
 	private String noProgressMessage = "No further progress can be made with the integrated logical methods.";
-	private String lastResortMessage = "Puzzle has been completed, through trial and error.";
+	private String lastResortMessage = "Puzzle has been completed, using Algorithm X.";
 	private String puzzleDoneMessage = "Puzzle is complete!";
 
 
@@ -299,14 +299,19 @@ public class DrawNumsConstructor extends PaintedObjects
 
 			// Make sure the puzzle is solvable, before doing anything else
 
-			inputForLastResort = new LastResort(ourSentSudoku);
+			theNonhumanSolver = new NonhumanSolver(ourSentSudoku);
+			int virtualSolveSolutions = theNonhumanSolver.dancingLinksSolve();
+			System.out.println(virtualSolveSolutions);
 
-			boolean didVirtualSolveSucceed = inputForLastResort.initiateCrudeVirtualSolve();
-
-			if(!(didVirtualSolveSucceed))
+			if(virtualSolveSolutions <= 0)
 			{
 				itsThePopUpPane.showNoSolutionMessage();
 			}
+			else if(virtualSolveSolutions >= 2)
+			{
+				itsThePopUpPane.showTooManySolutionsMessage();
+			}
+
 
 			// If so, advance
 
@@ -366,7 +371,6 @@ public class DrawNumsConstructor extends PaintedObjects
 	private void oneBigSolve()
 	{
 		holderOfAllSteps.addOneStep(bundleInTilde("Puzzle Start!"));
-
 
 		String incomingText;
 
@@ -430,25 +434,19 @@ public class DrawNumsConstructor extends PaintedObjects
 	} // advanceOneStep()
 
 
-	// Last Resort once logic techniques run out
+	// Last resort once logic techniques run out
 
 	private void enactLastResort(boolean calledInOneBigSolve)
 	{
-		// Should the user input a Sudoku with more than one solution, this check guarantees that the
-		// solution found by LastResort does not conflict with any work done by UsingLogicalMethods.
-		// Though, I'm not sure whether conflict is possible. UsingLogicalMethods works off certainty;
-		// I figure that it would never be able to make any moves down a branching path.
+		// Copy NonhumanSolver results into the sudoku squares
 
-		if(!(inputForLastResort.sameResults()))
+		theNonhumanSolver.copyFinalAnswerToSentSudoku();
+
+		if(!(theNonhumanSolver.noConflictsInResults()))
 		{
-			inputForLastResort = new LastResort(ourSentSudoku);
-			inputForLastResort.initiateCrudeVirtualSolve();
+			System.out.println("This should NEVER happen, but there is CONFLICT");
+			System.out.println("between the Nonhuman Solver & the Human Solver.");
 		}
-
-
-		// Use LastResort's function to copy its results into the Sudoku squares
-
-		inputForLastResort.copyLastResortToSudoku();
 
 
 		// Put everything in the UI

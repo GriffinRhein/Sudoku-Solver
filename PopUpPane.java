@@ -72,6 +72,17 @@ public class PopUpPane
 		theWindow.showMessageDialog(parentFrame,noSolutionMessage,"Solve Error",JOptionPane.ERROR_MESSAGE);
 	}
 
+
+	void showTooManySolutionsMessage()
+	{
+		JOptionPane theWindow = new JOptionPane();
+
+		String tooManySolutionsMessage = "This puzzle has more than one solution.";
+
+		theWindow.showMessageDialog(parentFrame,tooManySolutionsMessage,"Solve Error",JOptionPane.ERROR_MESSAGE);
+	}
+
+
 	void showItBrokeMessage()
 	{
 		JOptionPane theWindow = new JOptionPane();
